@@ -1,0 +1,11 @@
+
+server {
+    listen 0.0.0.0:8001;
+    server_name second.com;
+
+    location / {
+        autoindex off;
+        index index2.html;
+        allow_methods GET;
+    }
+}
