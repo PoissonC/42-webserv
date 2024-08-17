@@ -12,29 +12,29 @@
 
 #pragma once
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <string>
-#include <vector>
-#include <map>
 #include <cstring>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <iostream>
 #include <exception>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <netinet/in.h>
+#include <sstream>
+#include <string>
+#include <sys/socket.h>
+#include <vector>
 
-#include "ServerConfig.hpp"
 #include "LocationConfig.hpp"
+#include "ServerConfig.hpp"
 
 class Settings {
-	public:
-		Settings(const ServerConfig  & server);
-		std::string	getListen() const;
-		void		addServer(const ServerConfig & server);
-		friend class Server;
-	private:
-		int							_socket_fd;
-		struct sockaddr_in			_addr;
-		std::vector<ServerConfig>	_servers;
+public:
+	Settings(const ServerConfig &server);
+	std::string getListen() const;
+	void addServer(const ServerConfig &server);
+	friend class Server;
+
+private:
+	int _socket_fd;
+	struct sockaddr_in _addr;
+	std::vector< ServerConfig > _servers;
 };

@@ -11,10 +11,10 @@
 /* ************************************************************************** */
 
 #include "Settings.hpp"
-#include <cstdlib>
 #include <arpa/inet.h>
+#include <cstdlib>
 
-Settings::Settings(const ServerConfig & server) {
+Settings::Settings(const ServerConfig &server) {
 	std::string listen = server.getListen();
 	size_t end = listen.find_first_of(":", 0);
 	if (end == std::string::npos) {
@@ -42,10 +42,10 @@ Settings::Settings(const ServerConfig & server) {
 	_servers.push_back(server);
 }
 
-std::string	Settings::getListen() const {
+std::string Settings::getListen() const {
 	return _servers[0].getListen();
 }
 
-void	Settings::addServer(const ServerConfig & server) {
+void Settings::addServer(const ServerConfig &server) {
 	_servers.push_back(server);
 }

@@ -16,10 +16,10 @@
 
 typedef struct s_state {
 	// If the size of buffer is too large, we can consider to put this into a external file
-	std::string			buffer;
-	bool				sent;
-	unsigned char *		client_ip;
+	std::string buffer;
+	bool sent;
+	unsigned char *client_ip;
 	// std::ifstream		file;
 } t_state;
 
-void	fill_write_buffer(t_state *state, std::string const &response);
+void fill_write_buffer(t_state *state, std::string const &response);

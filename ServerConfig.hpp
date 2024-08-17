@@ -12,38 +12,38 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
+#include "LocationConfig.hpp"
+#include <dirent.h>
 #include <map>
 #include <stdexcept>
+#include <string>
 #include <sys/types.h>
-#include <dirent.h>
-#include "LocationConfig.hpp"
-
+#include <vector>
 
 
 class ServerConfig {
-	public:
-		ServerConfig();
-		// getters
-		std::vector<std::string>				getServerNames() const;
-		std::string								getListen() const;
-		std::map<int, std::string>				getErrorPages() const;
-		std::map<std::string, LocationConfig>	getLocations() const;
+public:
+	ServerConfig();
+	// getters
+	std::vector< std::string > getServerNames() const;
+	std::string getListen() const;
+	std::map< int, std::string > getErrorPages() const;
+	std::map< std::string, LocationConfig > getLocations() const;
 
-		// setters
-		void									addServerName(const std::vector<std::string> &tokens, size_t &pos);
-		void									setListen(const std::vector<std::string> &tokens, size_t &pos);
-		void									addErrorPage(const std::vector<std::string> &tokens, size_t &pos);
-		void									addLocation(const std::string & path, const LocationConfig &location);
-		
-		// methods
-		bool									hasRootLocation() const;	
-	private:
-		std::vector<std::string>				_server_name;
-		std::string								_listen;
-		std::map<std::string, LocationConfig>	_locations;
-		std::map<int, std::string>				_error_pages;
+	// setters
+	void addServerName(const std::vector< std::string > &tokens, size_t &pos);
+	void setListen(const std::vector< std::string > &tokens, size_t &pos);
+	void addErrorPage(const std::vector< std::string > &tokens, size_t &pos);
+	void addLocation(const std::string &path, const LocationConfig &location);
+
+	// methods
+	bool hasRootLocation() const;
+
+private:
+	std::vector< std::string > _server_name;
+	std::string _listen;
+	std::map< std::string, LocationConfig > _locations;
+	std::map< int, std::string > _error_pages;
 };
 
-ServerConfig parseServer(const std::vector<std::string> &tokens, size_t &pos);
+ServerConfig parseServer(const std::vector< std::string > &tokens, size_t &pos);
