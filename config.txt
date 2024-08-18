@@ -1,11 +1,10 @@
-
 server {
-    listen 0.0.0.0:8001;
-    server_name second.com;
+    listen 0.0.0.0:8000;
+    server_name mywebserver.com;
 
     location / {
         autoindex off;
-        index index2.html;
+        index index.html;
         allow_methods GET;
     }
 }

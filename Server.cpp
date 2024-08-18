@@ -6,60 +6,61 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:05:27 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/17 20:56:08 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/18 13:17:11 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
-#include <algorithm>
-#include <iostream>
-#include <utility>
-#include <cstdio>
 #include "Server.hpp"
 #include "State.hpp"
+#include <algorithm>
+#include <cstdio>
+#include <iostream>
+#include <unistd.h>
+#include <utility>
 
-bool	Server::_constructed = false;
-std::string processRequest(std::string request, std::vector<ServerConfig> settings, unsigned char * client_ip);
+bool Server::_constructed = false;
+std::string processRequest(std::string request, std::vector< ServerConfig > settings, unsigned char *client_ip);
 
 static void
-	close_fds(std::vector<int> & fds) {
-		for (std::vector<int>::iterator it = fds.begin(); it != fds.end(); it++) {
-			close(*it);
-		}
+close_fds(std::vector< int > &fds) {
+	for (std::vector< int >::iterator it = fds.begin(); it != fds.end(); it++) {
+		close(*it);
 	}
+}
 
 static bool
-	is_socket(std::vector<int> & socks, int fd) {
-		return std::find(socks.begin(), socks.end(), fd) == socks.end() ? false : true;
-	}
+is_socket(std::vector< int > &socks, int fd) {
+	return std::find(socks.begin(), socks.end(), fd) == socks.end() ? false : true;
+}
 
-static std::vector< std::pair<int, t_state> >::iterator
-	get_state(std::vector< std::pair<int, t_state> > & states, int fd) {
-		for (std::vector <std::pair<int, t_state> >::iterator it = states.begin(); it != states.end(); it++) {
-			if (it->first == fd)
-				return it;
-		}
-		return states.end();
+static std::vector< std::pair< int, t_state > >::iterator
+get_state(std::vector< std::pair< int, t_state > > &states, int fd) {
+	for (std::vector< std::pair< int, t_state > >::iterator it = states.begin(); it != states.end(); it++) {
+		if (it->first == fd)
+			return it;
 	}
+	return states.end();
+}
 
-static std::vector<struct pollfd>::iterator
-	find_it_in_next_pfds(std::vector<struct pollfd> & poll_fds, std::vector<struct pollfd>::iterator & tar) {
-		for (std::vector<struct pollfd>::iterator it = poll_fds.begin(); it != poll_fds.end(); it++) {
-			if (it->fd == tar->fd)
-				return it;
-		}
-		return poll_fds.end();
+static std::vector< struct pollfd >::iterator
+find_it_in_next_pfds(std::vector< struct pollfd > &poll_fds, std::vector< struct pollfd >::iterator &tar) {
+	for (std::vector< struct pollfd >::iterator it = poll_fds.begin(); it != poll_fds.end(); it++) {
+		if (it->fd == tar->fd)
+			return it;
 	}
+	return poll_fds.end();
+}
 
-Server::Server(std::vector<Settings> & settings) : _settings(settings) {
+Server::Server(std::vector< Settings > &settings) : _settings(settings) {
 	if (_constructed)
 		throw AlreadyConstructed();
 	_constructed = true;
 
 	// set socket for all servers, bind and listen.
 	{
-		for (std::vector<Settings>::iterator it = settings.begin(); it != settings.end(); it++) {
-			int new_socket_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+		for (std::vector< Settings >::iterator it = settings.begin(); it != settings.end(); it++) {
+			int new_socket_fd = socket(AF_INET, SOCK_STREAM, 0);// Create the socket without SOCK_NONBLOCK
+
 			if (new_socket_fd < 0) {
 				throw std::runtime_error("socket failed");
 			}
@@ -67,12 +68,12 @@ Server::Server(std::vector<Settings> & settings) : _settings(settings) {
 			_socks_fd.push_back(new_socket_fd);
 			{
 				int on = 1;
-				if (setsockopt(new_socket_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on)) < 0) {
+				if (setsockopt(new_socket_fd, SOL_SOCKET, SO_REUSEADDR, (char *) &on, sizeof(on)) < 0) {
 					close_fds(_socks_fd);
 					throw std::runtime_error("setsockopt failed");
 				}
 			}
-			if (bind(new_socket_fd, (struct sockaddr *)&(it->_addr), sizeof(it->_addr)) < 0) {
+			if (bind(new_socket_fd, (struct sockaddr *) &(it->_addr), sizeof(it->_addr)) < 0) {
 				close_fds(_socks_fd);
 				throw std::runtime_error("bind failed");
 			}
@@ -92,22 +93,22 @@ Server::Server(std::vector<Settings> & settings) : _settings(settings) {
 	}
 }
 
-static void close_conn(int fd, std::vector<struct pollfd> & poll_fds, std::vector< std::pair<int, t_state> > & states, std::vector< std::pair<int, t_state> >::iterator & cur_state) {
+static void close_conn(int fd, std::vector< struct pollfd > &poll_fds, std::vector< std::pair< int, t_state > > &states, std::vector< std::pair< int, t_state > >::iterator &cur_state) {
 	close(fd);
-	for (std::vector<struct pollfd>::iterator it = poll_fds.begin(); it != poll_fds.end(); it++) {
+	for (std::vector< struct pollfd >::iterator it = poll_fds.begin(); it != poll_fds.end(); it++) {
 		if (it->fd == fd) {
 			poll_fds.erase(it);
 			break;
 		}
 	}
-	// This should destroy the cur_state element (free resourses, Chat GPT says so)
+	// This should destroy the cur_state element (free resources, ChatGPT says so)
 	states.erase(cur_state);
 	std::cout << "connection ends" << std::endl;
 }
 
-void	Server::run() {
-	int					nfds;
-	std::vector< std::pair<int, t_state> >	states;
+void Server::run() {
+	int nfds;
+	std::vector< std::pair< int, t_state > > states;
 
 	_next_poll_fds = _cur_poll_fds;
 	while (1) {
@@ -116,7 +117,7 @@ void	Server::run() {
 			throw std::runtime_error("poll failed");
 
 		// Process all returned events
-		for (std::vector<struct pollfd>::iterator it = _cur_poll_fds.begin(); it != _cur_poll_fds.end(); it++) {
+		for (std::vector< struct pollfd >::iterator it = _cur_poll_fds.begin(); it != _cur_poll_fds.end(); it++) {
 			if (it->revents == 0)
 				continue;
 			// if (it->revents == POLLIN)
@@ -124,29 +125,29 @@ void	Server::run() {
 			if (is_socket(_socks_fd, it->fd)) {
 				int new_sd;
 				// Accept new connections
-				struct sockaddr_in	addr_client;
+				struct sockaddr_in addr_client;
 				socklen_t client_addr_len = sizeof(addr_client);
-				while ((new_sd = accept(it->fd, (sockaddr*)&addr_client, &client_addr_len)) != -1) {
+				while ((new_sd = accept(it->fd, (sockaddr *) &addr_client, &client_addr_len)) != -1) {
 					struct pollfd new_pfd;
 					bzero(&new_pfd, sizeof(struct pollfd));
 					new_pfd.fd = new_sd;
 					new_pfd.events = POLLIN | POLLHUP | POLLERR;
 					_next_poll_fds.push_back(new_pfd);
-					
-					t_state	new_conn;
+
+					t_state new_conn;
 					new_conn.sent = false;
-					new_conn.client_ip = (unsigned char *)&addr_client.sin_addr.s_addr;
+					new_conn.client_ip = (unsigned char *) &addr_client.sin_addr.s_addr;
 					states.push_back(std::make_pair(new_sd, new_conn));
 				}
 			}
 			// If the event is not in _socks_fd, handle recv/send
 			else {
-				char												buffer[BUFFER_SIZE];
-				std::vector< std::pair<int, t_state> >::iterator	cur_state;
+				char buffer[BUFFER_SIZE];
+				std::vector< std::pair< int, t_state > >::iterator cur_state;
 
 				cur_state = get_state(states, it->fd);
 				if (cur_state == states.end())
-						throw std::runtime_error("State not found");
+					throw std::runtime_error("State not found");
 
 				// Close connection if any error occurs (http/1.1 keeps the connection)
 				if (it->revents & (POLLHUP | POLLERR)) {
@@ -155,13 +156,13 @@ void	Server::run() {
 				}
 				if (it->revents & POLLOUT) {
 					// Handle write event
-					int	wc = 0;
+					int wc = 0;
 					if (cur_state->second.buffer.size()) {
 						wc = send(it->fd, cur_state->second.buffer.c_str(), cur_state->second.buffer.size(), 0);
 					}
 					if (wc < 0)
 						perror("send() failed");
-					else  {
+					else {
 						// erase the buffer anyway, and keep the connection open
 						cur_state->second.buffer.erase(0, wc);
 						cur_state->second.sent = false;
@@ -175,7 +176,7 @@ void	Server::run() {
 					int	rc;
 
 					rc = recv(it->fd, buffer, sizeof(buffer), 0);
-					std::vector<Settings>::iterator targets = _settings.begin();
+					std::vector< Settings >::iterator targets = _settings.begin();
 					for (; targets != _settings.end(); targets++) {
 						if (targets->_socket_fd == cur_state->first)
 							break;
@@ -183,20 +184,19 @@ void	Server::run() {
 					if (targets == _settings.end())
 						targets = _settings.begin();
 					if (rc < 0)
-						perror("recv() failed");	
+						perror("recv() failed");
 					else {
 						cur_state->second.buffer.append(buffer, rc);
 						// The reading ends.
 						if (rc < BUFFER_SIZE) {
-						// std::cout  <<"Request: " << cur_state->second.buffer << std::endl;
+							// std::cout  <<"Request: " << cur_state->second.buffer << std::endl;
 							if (cur_state->second.buffer.empty()) {
 								close_conn(it->fd, _next_poll_fds, states, cur_state);
 								continue;
-							}
-							else if (cur_state->second.sent == false) {
+							} else if (cur_state->second.sent == false) {
 								cur_state->second.buffer = processRequest(cur_state->second.buffer, targets->_servers, cur_state->second.client_ip);
 								cur_state->second.buffer = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 13\n\nHello World!\n";
-								std::cout <<"Response: " << cur_state->second.buffer << std::endl;
+								std::cout << "Response: " << cur_state->second.buffer << std::endl;
 								find_it_in_next_pfds(_next_poll_fds, it)->events = POLLOUT | POLLHUP | POLLERR;
 								cur_state->second.sent = true;
 							}
@@ -215,6 +215,6 @@ Server::~Server() {
 
 // Exceptions
 
-const char* Server::AlreadyConstructed::what() const throw() {
+const char *Server::AlreadyConstructed::what() const throw() {
 	return "The server instance is already constructed.";
 }

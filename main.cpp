@@ -10,27 +10,26 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "parser.hpp"
 #include "Server.hpp"
-#include <iostream>
+#include "parser.hpp"
 #include <cerrno>
 #include <cstdio>
+#include <iostream>
 
-int main (int ac, char **av) {
+int main(int ac, char **av) {
 	if (ac != 2 && ac != 1) {
 		std::cerr << "Usage: " << av[0] << " <config file>(optional)" << std::endl;
 		return 1;
 	}
-	try{
+	try {
 		std::string filename = "config.txt";
 		if (ac == 2)
 			filename = av[1];
-		std::vector<Settings> settings;
+		std::vector< Settings > settings;
 		parse(settings, filename);
 		Server server(settings);
 		server.run();
-	}
-	catch (std::exception & e){
+	} catch (std::exception &e) {
 		if (errno != 0)
 			perror(e.what());
 		else

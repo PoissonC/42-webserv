@@ -16,4 +16,4 @@
 #include "ServerConfig.hpp"
 #include "Settings.hpp"
 
-void	parse(std::vector<Settings> & settings, const std::string & filename);
+void parse(std::vector< Settings > &settings, const std::string &filename);

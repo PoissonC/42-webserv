@@ -11,50 +11,50 @@
 /* ************************************************************************** */
 
 #include "ServerConfig.hpp"
-#include <dirent.h> // for checks
+#include <dirent.h>// for checks
 
 ServerConfig::ServerConfig() : _listen("0.0.0.0:80") {
 }
 
-std::vector<std::string>	ServerConfig::getServerNames() const {
+std::vector< std::string > ServerConfig::getServerNames() const {
 	return _server_name;
 }
 
-std::string	ServerConfig::getListen() const {
+std::string ServerConfig::getListen() const {
 	return _listen;
 }
 
-std::map<int, std::string>	ServerConfig::getErrorPages() const {
+std::map< int, std::string > ServerConfig::getErrorPages() const {
 	return _error_pages;
 }
 
-std::map<std::string, LocationConfig>	ServerConfig::getLocations() const {
+std::map< std::string, LocationConfig > ServerConfig::getLocations() const {
 	return _locations;
 }
 
-void	ServerConfig::setListen(const std::vector<std::string> &tokens, size_t &pos) {
+void ServerConfig::setListen(const std::vector< std::string > &tokens, size_t &pos) {
 	_listen = tokens[pos++];
 	if (tokens[pos++] != ";")
 		throw std::runtime_error("Expected ';' after listen");
 }
 
-void	ServerConfig::addServerName(const std::vector<std::string> &tokens, size_t &pos) {
+void ServerConfig::addServerName(const std::vector< std::string > &tokens, size_t &pos) {
 	while (tokens[pos] != ";" && pos < tokens.size()) {
 		_server_name.push_back(tokens[pos++]);
 	}
 	if (pos == tokens.size())
 		throw std::runtime_error("Expected ';' after server name");
-	pos++; // skip ';'
+	pos++;// skip ';'
 }
 
-void	ServerConfig::addErrorPage(const std::vector<std::string> &tokens, size_t &pos) {
+void ServerConfig::addErrorPage(const std::vector< std::string > &tokens, size_t &pos) {
 	int code = 0;
 	for (size_t i = 0; i < tokens[pos].size(); i++) {
 		if (tokens[pos][i] < '0' || tokens[pos][i] > '9')
 			throw std::runtime_error("Invalid status code: " + tokens[pos]);
 		code = code * 10 + tokens[pos][i] - '0';
 	}
-	for (std::map<int, std::string>::iterator it = _error_pages.begin(); it != _error_pages.end(); it++) {
+	for (std::map< int, std::string >::iterator it = _error_pages.begin(); it != _error_pages.end(); it++) {
 		if (it->first == code)
 			throw std::runtime_error("Duplicate status code");
 	}
@@ -63,10 +63,10 @@ void	ServerConfig::addErrorPage(const std::vector<std::string> &tokens, size_t &
 	_error_pages[code] = tokens[++pos];
 	if (tokens[++pos] != ";")
 		throw std::runtime_error("Expected ';' after error page");
-	pos++; // skip ';'
+	pos++;// skip ';'
 }
 
-void	ServerConfig::addLocation(const std::string & path, const LocationConfig &location) {
+void ServerConfig::addLocation(const std::string &path, const LocationConfig &location) {
 	if (_locations.find(path) != _locations.end())
 		throw std::runtime_error("Location already exists");
 	_locations[path] = location;
@@ -76,14 +76,14 @@ void	ServerConfig::addLocation(const std::string & path, const LocationConfig &l
 bool ServerConfig::hasRootLocation() const {
 	if (_locations.empty())
 		return false;
-	for (std::map<std::string, LocationConfig>::const_iterator it = _locations.begin(); it != _locations.end(); it++) {
+	for (std::map< std::string, LocationConfig >::const_iterator it = _locations.begin(); it != _locations.end(); it++) {
 		if (it->first == "/")
 			return true;
 	}
 	return false;
 }
 
-static void	locationCheck(const LocationConfig & loc) {
+static void locationCheck(const LocationConfig &loc) {
 	if (!loc.getIndex().empty() && !loc.getCgiPass().empty())
 		throw std::runtime_error("Location: Cannot have both index and cgi_pass");
 	std::string path = "." + loc.getRoot();
@@ -94,7 +94,7 @@ static void	locationCheck(const LocationConfig & loc) {
 	if (loc.getClientUpload() != "forbidden") {
 		if (path != "./")
 			dir = opendir((path + loc.getClientUpload()).c_str());
-		else 
+		else
 			dir = opendir(loc.getClientUpload().c_str());
 		if (dir == NULL)
 			throw std::runtime_error("Client upload directory does not exist");
@@ -107,14 +107,14 @@ static void	locationCheck(const LocationConfig & loc) {
 		closedir(dir);
 	}
 }
-static void		serverCheck(const ServerConfig & server) {
-	std::map<std::string, LocationConfig> loc = server.getLocations();
-	for (std::map<std::string, LocationConfig>::iterator it = loc.begin(); it != loc.end(); it++) {
+static void serverCheck(const ServerConfig &server) {
+	std::map< std::string, LocationConfig > loc = server.getLocations();
+	for (std::map< std::string, LocationConfig >::iterator it = loc.begin(); it != loc.end(); it++) {
 		locationCheck(it->second);
 	}
 }
 
-ServerConfig	parseServer(const std::vector<std::string> &tokens, size_t &pos) {
+ServerConfig parseServer(const std::vector< std::string > &tokens, size_t &pos) {
 	ServerConfig server;
 
 	while (pos < tokens.size() && tokens[pos] != "}") {
@@ -122,18 +122,15 @@ ServerConfig	parseServer(const std::vector<std::string> &tokens, size_t &pos) {
 			if (pos + 1 == tokens.size())
 				throw std::runtime_error("Expected server name");
 			server.addServerName(tokens, ++pos);
-		}
-		else if (tokens[pos] == "listen") {
+		} else if (tokens[pos] == "listen") {
 			if (pos + 1 == tokens.size())
 				throw std::runtime_error("Expected listen address");
 			server.setListen(tokens, ++pos);
-		}
-		else if (tokens[pos] == "error_page") {
+		} else if (tokens[pos] == "error_page") {
 			if (pos + 1 == tokens.size())
 				throw std::runtime_error("Expected error page");
 			server.addErrorPage(tokens, ++pos);
-		}
-		else if (tokens[pos] == "location") {
+		} else if (tokens[pos] == "location") {
 			if (pos + 1 == tokens.size())
 				throw std::runtime_error("Expected location path");
 			std::string path = tokens[++pos];
@@ -143,14 +140,13 @@ ServerConfig	parseServer(const std::vector<std::string> &tokens, size_t &pos) {
 				throw std::runtime_error("Expected '{' after 'location'");
 			LocationConfig location = parseLocation(tokens, ++pos);
 			server.addLocation(path, location);
-		}
-		else {
+		} else {
 			throw std::runtime_error("Unexpected token in server block '" + tokens[pos] + "'");
 		}
 	}
 	if (pos == tokens.size())
 		throw std::runtime_error("Expected '}' at the end of server block");
-	pos++; // skip '}'
+	pos++;// skip '}'
 	if (server.hasRootLocation() == false)
 		throw std::runtime_error("Server block must have a root location '/'");
 	serverCheck(server);
