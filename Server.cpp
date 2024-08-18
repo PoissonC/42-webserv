@@ -11,11 +11,9 @@
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "Server_helper.hpp"
 
 bool Server::_constructed = false;
-std::string processRequest(std::string request,
-                           std::vector<ServerConfig> settings,
-                           unsigned char *client_ip);
 
 void Server::run_a_server(std::vector<Settings>::iterator &it) {
   int new_socket_fd;
@@ -167,6 +165,8 @@ void Server::read_request(std::vector<t_state>::iterator &state,
   if (rc < BUFFER_SIZE) {
     // finish reading, it needs to do something and checks conditions. Below
     // just for tests:
+    state->req = new Request(buf);
+    state->res = new Response();
     state->stage = SEND_RESPONSE;
     std::vector<struct pollfd>::iterator next_pfd =
         find_it_in_pfds(_next_poll_fds, pfd.fd);
@@ -179,16 +179,15 @@ void Server::send_response(std::vector<t_state>::iterator &state,
   if (!(pfd.revents & POLLOUT))
     return;
 
-  // tmp for tests, it only works for a single connection
-  std::string response = "HTTP/1.1 200 OK\nContent-Type: "
-                         "text/html\nContent-Length: 13\n\nHello World!\n";
-  static int idx = 0;
-  // tmp ends
+  static int resStringSentBytes = 0;
+  std::string resString = state->res->generateResponseString();
+  e_methods method = state->req->getMethod();
+  std::string uri = state->req->getUri();
 
-  ssize_t wc = send(state->conn_fd, response.c_str() + idx,
-                    response.size() - idx, MSG_DONTWAIT);
+  ssize_t wc = send(state->conn_fd, resString.c_str() + resStringSentBytes,
+                    resString.size() - resStringSentBytes, MSG_DONTWAIT);
 
-  if (wc == (long)response.size() - idx) {
+  if (wc == (long)resString.size() - resStringSentBytes) {
     // finish reading, it needs to do something and checks conditions. Below
     // just for tests:
     state->stage = NEW_CONN;
@@ -196,7 +195,7 @@ void Server::send_response(std::vector<t_state>::iterator &state,
         find_it_in_pfds(_next_poll_fds, pfd.fd);
     next_pfd->events = POLLIN | POLLHUP | POLLERR;
   } else {
-    idx += wc;
+    resStringSentBytes += wc;
   }
 }
 

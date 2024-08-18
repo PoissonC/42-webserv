@@ -12,29 +12,30 @@
 
 #pragma once
 
+#include "Request.hpp"
+#include "Response.hpp"
 #include <string>
 
 typedef enum e_stage {
-	NEW_CONN,
-	READ_REQUEST,
-	SEND_RESPONSE,
-	READ_FILE,
-	FORK_CGI,
-	READ_CGI
+  NEW_CONN,
+  READ_REQUEST,
+  SEND_RESPONSE,
+  READ_FILE,
+  FORK_CGI,
+  READ_CGI
 } t_stage;
 
 typedef struct s_state {
-	std::string request_buff;
-	std::string response_buff;
-	std::string file_buff;
+  std::string request_buff;
+  std::string response_buff;
+  std::string file_buff;
 
-	// Request reqest;
-	// Response response;
-	
+  Request *req;
+  Response *res;
 
-	unsigned char *client_ip;
+  unsigned char *client_ip;
 
-	int	conn_fd, file_fd;
+  int conn_fd, file_fd;
 
-	t_stage		stage;
+  t_stage stage;
 } t_state;
