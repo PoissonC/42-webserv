@@ -16,11 +16,31 @@
 bool Server::_constructed = false;
 std::string processRequest(std::string request, std::vector< ServerConfig > settings, unsigned char *client_ip);
 
-void Server::run_a_server(std::vector< Settings >::iterator & it) {
-	int new_socket_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);// Create the socket with SOCK_NONBLOCK
+void Server::run_a_server(std::vector< Settings >::iterator &it) {
+	int new_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (new_socket_fd < 0) {
 		throw std::runtime_error("socket failed");
 	}
+
+#ifdef __linux__
+	// For Linux, set the socket to non-blocking at the time of creation
+	int flags = SOCK_NONBLOCK;
+	if (fcntl(new_socket_fd, F_SETFL, flags) == -1) {
+		close_fds(_socks_fd);
+		throw SetSockOptFail();
+	}
+#elif __APPLE__
+	// For macOS, set the socket to non-blocking using fcntl
+	int flags = fcntl(new_socket_fd, F_GETFL, 0);
+	if (flags == -1) {
+		close_fds(_socks_fd);
+		throw std::runtime_error("socket failed");
+	}
+	if (fcntl(new_socket_fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+		close_fds(_socks_fd);
+		throw std::runtime_error("socket failed");
+	}
+#endif
 
 	it->_socket_fd = new_socket_fd;
 	_socks_fd.push_back(new_socket_fd);
@@ -72,12 +92,12 @@ void Server::run() {
 			if (it->revents == 0)
 				continue;
 			// Check if the event is for a server socket
-			if (is_socket(_socks_fd, it->fd)) 
+			if (is_socket(_socks_fd, it->fd))
 				new_conns(_states, _next_poll_fds, it->fd);
 
 			// If the event is not in _socks_fd, handle 5 stages
 			else {
-				std::vector<t_state>::iterator cur_state = get_state(_states, it->fd);
+				std::vector< t_state >::iterator cur_state = get_state(_states, it->fd);
 
 				if (cur_state == _states.end())
 					throw std::runtime_error("State not found");
@@ -92,24 +112,24 @@ void Server::run() {
 				// if (it->revents & POLLOUT)
 				// 	std::cout << "Output ready." << std::endl;
 				switch (cur_state->stage) {
-				case NEW_CONN:
-					new_conn_stage(cur_state, *it);
-					break;
-				case READ_REQUEST:
-					read_request(cur_state, *it);
-					break;
-				case SEND_RESPONSE:
-					send_response(cur_state, *it);
-					break;
-				case READ_FILE:
-					read_file(cur_state, *it);
-					break;
-				case FORK_CGI:
-					fork_cgi(cur_state, *it);
-					break;
-				case READ_CGI:
-					read_cgi(cur_state, *it);
-					break;
+					case NEW_CONN:
+						new_conn_stage(cur_state, *it);
+						break;
+					case READ_REQUEST:
+						read_request(cur_state, *it);
+						break;
+					case SEND_RESPONSE:
+						send_response(cur_state, *it);
+						break;
+					case READ_FILE:
+						read_file(cur_state, *it);
+						break;
+					case FORK_CGI:
+						fork_cgi(cur_state, *it);
+						break;
+					case READ_CGI:
+						read_cgi(cur_state, *it);
+						break;
 				}
 			}
 		}
@@ -117,19 +137,19 @@ void Server::run() {
 	}
 }
 
-void Server::new_conn_stage(std::vector<t_state>::iterator & state, const struct pollfd & pfd) {
+void Server::new_conn_stage(std::vector< t_state >::iterator &state, const struct pollfd &pfd) {
 	if (pfd.revents & POLLIN) {
 		state->stage = READ_REQUEST;
 		read_request(state, pfd);
 	}
 }
 
-void Server::read_request(std::vector<t_state>::iterator & state, const struct pollfd & pfd) {
+void Server::read_request(std::vector< t_state >::iterator &state, const struct pollfd &pfd) {
 	if (!(pfd.revents & POLLIN))
 		return;
 
-	char	buf[BUFFER_SIZE];
-	ssize_t	rc = recv(state->conn_fd, buf, BUFFER_SIZE, MSG_DONTWAIT);
+	char buf[BUFFER_SIZE];
+	ssize_t rc = recv(state->conn_fd, buf, BUFFER_SIZE, MSG_DONTWAIT);
 
 	// < 0 ..> an error occurs, = 0 client closes the connection
 	if (rc <= 0) {
@@ -142,12 +162,12 @@ void Server::read_request(std::vector<t_state>::iterator & state, const struct p
 	if (rc < BUFFER_SIZE) {
 		// finish reading, it needs to do something and checks conditions. Below just for tests:
 		state->stage = SEND_RESPONSE;
-		std::vector< struct pollfd >::iterator next_pfd= find_it_in_pfds(_next_poll_fds, pfd.fd);
+		std::vector< struct pollfd >::iterator next_pfd = find_it_in_pfds(_next_poll_fds, pfd.fd);
 		next_pfd->events = POLLOUT | POLLHUP | POLLERR;
 	}
 }
 
-void Server::send_response(std::vector<t_state>::iterator & state, const struct pollfd & pfd) {
+void Server::send_response(std::vector< t_state >::iterator &state, const struct pollfd &pfd) {
 	if (!(pfd.revents & POLLOUT))
 		return;
 
@@ -156,32 +176,32 @@ void Server::send_response(std::vector<t_state>::iterator & state, const struct 
 	static int idx = 0;
 	// tmp ends
 
-	ssize_t	wc = send(state->conn_fd, response.c_str() + idx, response.size() - idx, MSG_DONTWAIT);
+	ssize_t wc = send(state->conn_fd, response.c_str() + idx, response.size() - idx, MSG_DONTWAIT);
 
-	if (wc == (long)response.size() - idx) {
+	if (wc == (long) response.size() - idx) {
 		// finish reading, it needs to do something and checks conditions. Below just for tests:
 		state->stage = NEW_CONN;
-		std::vector< struct pollfd >::iterator next_pfd= find_it_in_pfds(_next_poll_fds, pfd.fd);
+		std::vector< struct pollfd >::iterator next_pfd = find_it_in_pfds(_next_poll_fds, pfd.fd);
 		next_pfd->events = POLLIN | POLLHUP | POLLERR;
 	} else {
 		idx += wc;
 	}
 }
 
-void Server::read_file(std::vector<t_state>::iterator & state, const struct pollfd & pfd) {
-(void)state; (void)pfd;
+void Server::read_file(std::vector< t_state >::iterator &state, const struct pollfd &pfd) {
+	(void) state;
+	(void) pfd;
 }
-void Server::fork_cgi(std::vector<t_state>::iterator & state, const struct pollfd & pfd) {
-(void)state; (void)pfd;
-
+void Server::fork_cgi(std::vector< t_state >::iterator &state, const struct pollfd &pfd) {
+	(void) state;
+	(void) pfd;
 }
-void Server::read_cgi(std::vector<t_state>::iterator & state, const struct pollfd & pfd) {
-(void)state; (void)pfd;
-
+void Server::read_cgi(std::vector< t_state >::iterator &state, const struct pollfd &pfd) {
+	(void) state;
+	(void) pfd;
 }
 
 
 Server::~Server() {
 	close_fds(_socks_fd);
 }
-
