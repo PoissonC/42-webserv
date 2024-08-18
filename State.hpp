@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/18 15:52:22 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/18 17:14:22 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,12 @@ typedef enum e_stage {
 
 typedef struct s_state {
 	std::string request_buff;
+	std::string response_buff;
 	std::string file_buff;
+
+	// Request reqest;
+	// Response response;
+	
 
 	unsigned char *client_ip;
 

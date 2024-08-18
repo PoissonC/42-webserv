@@ -21,9 +21,12 @@ void new_conns(std::vector<t_state> & states, std::vector< struct pollfd > & pol
 
 		t_state new_conn;
 		// not finished
+		bzero(&new_conn, sizeof(t_state));
+		new_conn.stage = NEW_CONN;
+		new_conn.conn_fd = new_sd;
 		new_conn.client_ip = (unsigned char *) &addr_client.sin_addr.s_addr;
 		states.push_back(new_conn);
-		std::cout << "New connection from: " << addr_client.sin_addr.s_addr << std::endl;
+		std::cout << "New connection fd: " << new_conn.conn_fd << std::endl;
 	}
 }
 
@@ -51,7 +54,7 @@ bool is_socket(std::vector< int > &socks, int fd) {
 }
 
 std::vector<t_state>::iterator
-get_state(std::vector<t_state> &states, int fd) {
+get_state(std::vector<t_state> & states, int fd) {
 	for (std::vector<t_state>::iterator it = states.begin(); it != states.end(); it++) {
 		if (it->conn_fd == fd)
 			return it;
@@ -60,9 +63,9 @@ get_state(std::vector<t_state> &states, int fd) {
 }
 
 std::vector< struct pollfd >::iterator
-find_it_in_next_pfds(std::vector< struct pollfd > &poll_fds, std::vector< struct pollfd >::iterator &tar) {
+find_it_in_pfds(std::vector< struct pollfd > &poll_fds, int fd) {
 	for (std::vector< struct pollfd >::iterator it = poll_fds.begin(); it != poll_fds.end(); it++) {
-		if (it->fd == tar->fd)
+		if (it->fd == fd)
 			return it;
 	}
 	return poll_fds.end();

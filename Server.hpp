@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 22:00:02 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/18 16:04:32 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/18 16:34:36 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 #include <fcntl.h>
 #endif
 
-#define BUFFER_SIZE 80
+#define BUFFER_SIZE 1024
 #define BACK_LOG 32
 #define MAX_EVENTS 16
 
@@ -54,14 +54,14 @@ private:
 	std::vector<t_state> _states;
 
 	// Stages would block
-	void	read_request(t_state &, const struct pollfd & pfd);		// open the requested file in the end
-	void	send_response(t_state &, const struct pollfd & pfd);
-	void	read_file(t_state &, const struct pollfd & pfd);
-	void	fork_cgi(t_state &, const struct pollfd & pfd);
-	void	read_cgi(t_state &, const struct pollfd & pfd);
+	void	read_request(std::vector<t_state>::iterator & state, const struct pollfd & pfd);		// open the requested file in the end
+	void	send_response(std::vector<t_state>::iterator & state, const struct pollfd & pfd);
+	void	read_file(std::vector<t_state>::iterator & state, const struct pollfd & pfd);
+	void	fork_cgi(std::vector<t_state>::iterator & state, const struct pollfd & pfd);
+	void	read_cgi(std::vector<t_state>::iterator & state, const struct pollfd & pfd);
 
 	// funcs
-	void	new_conn_stage(t_state &, const struct pollfd & pfd);
+	void	new_conn_stage(std::vector<t_state>::iterator & state, const struct pollfd & pfd);
 	void	run_a_server(std::vector< Settings >::iterator &); // socket, setsockopt, bind, listen
 	
 };

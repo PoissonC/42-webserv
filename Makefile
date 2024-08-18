@@ -7,7 +7,7 @@ OBJ_DIR		= obj/
 
 # Sources and objects
 SRC 		= main.cpp Server.cpp Server_helper.cpp Settings.cpp \
-				State.cpp ServerConfig.cpp LocationConfig.cpp \
+				ServerConfig.cpp LocationConfig.cpp \
 				parser.cpp httpRequestParser.cpp processRequest.cpp
 OBJ 		= $(SRC:%.cpp=$(OBJ_DIR)%.o)
 HDR 		= Server.hpp Server_helper.hpp Settings.hpp State.hpp ServerConfig.hpp \

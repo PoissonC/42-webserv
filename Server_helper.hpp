@@ -19,4 +19,4 @@ std::vector<t_state>::iterator
 	get_state(std::vector<t_state> &states, int fd);
 
 std::vector< struct pollfd >::iterator
-	find_it_in_next_pfds(std::vector< struct pollfd > &poll_fds, std::vector< struct pollfd >::iterator &tar);
+	find_it_in_pfds(std::vector< struct pollfd > &poll_fds, int fd);
