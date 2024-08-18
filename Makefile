@@ -6,11 +6,11 @@ CFLAGS 		= -std=c++98 -Wall -Wextra -Werror #-fsanitize=address
 OBJ_DIR		= obj/
 
 # Sources and objects
-SRC 		= main.cpp Server.cpp Settings.cpp \
+SRC 		= main.cpp Server.cpp Server_helper.cpp Settings.cpp \
 				State.cpp ServerConfig.cpp LocationConfig.cpp \
 				parser.cpp httpRequestParser.cpp processRequest.cpp
 OBJ 		= $(SRC:%.cpp=$(OBJ_DIR)%.o)
-HDR 		= Server.hpp Settings.hpp State.hpp ServerConfig.hpp \
+HDR 		= Server.hpp Server_helper.hpp Settings.hpp State.hpp ServerConfig.hpp \
 				LocationConfig.hpp parser.hpp httpRequestParser.hpp
 
 NAME = webserv

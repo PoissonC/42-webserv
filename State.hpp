@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/06/20 01:21:36 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/18 14:56:56 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,23 @@
 
 #include <string>
 
+typedef enum e_stage {
+	READ_REQUEST,
+	SEND_RESPONSE,
+	READ_FILE,
+	FORK_CGI,
+	READ_CGI
+} t_stage;
+
 typedef struct s_state {
-	// If the size of buffer is too large, we can consider to put this into a external file
-	std::string buffer;
-	bool sent;
+	std::string request_buff;
+	std::string file_buff;
+
 	unsigned char *client_ip;
-	// std::ifstream		file;
+
+	int	conn_fd, file_fd;
+
+	t_stage		stage;
 } t_state;
 
 void fill_write_buffer(t_state *state, std::string const &response);

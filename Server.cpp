@@ -6,50 +6,16 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:05:27 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/18 13:17:11 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/18 13:40:51 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include "State.hpp"
-#include <algorithm>
-#include <cstdio>
-#include <iostream>
-#include <unistd.h>
-#include <utility>
+
 
 bool Server::_constructed = false;
 std::string processRequest(std::string request, std::vector< ServerConfig > settings, unsigned char *client_ip);
 
-static void
-close_fds(std::vector< int > &fds) {
-	for (std::vector< int >::iterator it = fds.begin(); it != fds.end(); it++) {
-		close(*it);
-	}
-}
-
-static bool
-is_socket(std::vector< int > &socks, int fd) {
-	return std::find(socks.begin(), socks.end(), fd) == socks.end() ? false : true;
-}
-
-static std::vector< std::pair< int, t_state > >::iterator
-get_state(std::vector< std::pair< int, t_state > > &states, int fd) {
-	for (std::vector< std::pair< int, t_state > >::iterator it = states.begin(); it != states.end(); it++) {
-		if (it->first == fd)
-			return it;
-	}
-	return states.end();
-}
-
-static std::vector< struct pollfd >::iterator
-find_it_in_next_pfds(std::vector< struct pollfd > &poll_fds, std::vector< struct pollfd >::iterator &tar) {
-	for (std::vector< struct pollfd >::iterator it = poll_fds.begin(); it != poll_fds.end(); it++) {
-		if (it->fd == tar->fd)
-			return it;
-	}
-	return poll_fds.end();
-}
 
 Server::Server(std::vector< Settings > &settings) : _settings(settings) {
 	if (_constructed)
@@ -93,18 +59,6 @@ Server::Server(std::vector< Settings > &settings) : _settings(settings) {
 	}
 }
 
-static void close_conn(int fd, std::vector< struct pollfd > &poll_fds, std::vector< std::pair< int, t_state > > &states, std::vector< std::pair< int, t_state > >::iterator &cur_state) {
-	close(fd);
-	for (std::vector< struct pollfd >::iterator it = poll_fds.begin(); it != poll_fds.end(); it++) {
-		if (it->fd == fd) {
-			poll_fds.erase(it);
-			break;
-		}
-	}
-	// This should destroy the cur_state element (free resources, ChatGPT says so)
-	states.erase(cur_state);
-	std::cout << "connection ends" << std::endl;
-}
 
 void Server::run() {
 	int nfds;
@@ -138,6 +92,7 @@ void Server::run() {
 					new_conn.sent = false;
 					new_conn.client_ip = (unsigned char *) &addr_client.sin_addr.s_addr;
 					states.push_back(std::make_pair(new_sd, new_conn));
+					std::cout << "New connection" << std::endl;
 				}
 			}
 			// If the event is not in _socks_fd, handle recv/send

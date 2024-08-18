@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   LocationConfig.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yu <yu@student.42.fr>                      +#+  +:+       +#+        */
+/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 12:34:34 by yu                #+#    #+#             */
-/*   Updated: 2024/05/30 18:14:27 by yu               ###   ########.fr       */
+/*   Updated: 2024/08/18 14:50:44 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 LocationConfig::LocationConfig() : _root(), _cgi_pass(), _client_upload("forbidden"), _redir(std::make_pair(0, "")), _autoindex(false), _client_body_buffer_size(8 * 1024) {
 	for (int i = 0; i < 3; i++)
-		_allow_methods[i] = true;
+		_allow_methods[i] = false;
 }
 
 void LocationConfig::setAllowMethods(const std::vector< std::string > &tokens, size_t &pos) {
@@ -31,6 +31,9 @@ void LocationConfig::setAllowMethods(const std::vector< std::string > &tokens, s
 	}
 	if (pos == tokens.size())
 		throw std::runtime_error("Expected ';' after 'allow_methods'");
+	if (!_allow_methods[0] && !_allow_methods[1] && !_allow_methods[2]) {
+		_allow_methods[0] = _allow_methods[1] = _allow_methods[2] = true;
+	}
 	pos++;// skip ';'
 }
 

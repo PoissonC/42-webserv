@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 22:00:02 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/18 13:17:51 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/18 14:36:02 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,15 @@
 
 #include "Settings.hpp"
 #include <algorithm>
+#include <cstdio>
+#include <iostream>
+#include <unistd.h>
+#include <utility>
 #include <exception>
 #include <poll.h>
 #include <vector>
+#include "State.hpp"
+#include "Server_helper.hpp"
 #ifdef __APPLE__
 #include <fcntl.h>
 #endif
@@ -52,4 +58,13 @@ private:
 	std::vector< struct pollfd > _cur_poll_fds;
 	std::vector< struct pollfd > _next_poll_fds;
 	std::vector< Settings > &_settings;
+
+	// functions
+	void	read_request();		// open the requested file in the end
+	
+	void	send_response();
+	void	read_file();
+	void	fork_cgi();
+	void	read_cgi();
+	
 };
