@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:05:27 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/18 17:44:29 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/18 18:02:27 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,28 +18,28 @@ std::string processRequest(std::string request,
                            unsigned char *client_ip);
 
 void Server::run_a_server(std::vector<Settings>::iterator &it) {
-  int new_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-  if (new_socket_fd < 0) {
-    throw std::runtime_error("socket failed");
-  }
-
+  int new_socket_fd;
 #ifdef __linux__
+  new_socket_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
   // For Linux, set the socket to non-blocking at the time of creation
-  int flags = SOCK_NONBLOCK;
-  if (fcntl(new_socket_fd, F_SETFL, flags) == -1) {
-    close_fds(_socks_fd);
+  if (new_socket_fd < 0) {
     throw std::runtime_error("socket failed");
   }
 #elif __APPLE__
   // For macOS, set the socket to non-blocking using fcntl
+  new_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (new_socket_fd < 0) {
+    throw std::runtime_error("socket failed");
+  }
+
   int flags = fcntl(new_socket_fd, F_GETFL, 0);
   if (flags == -1) {
     close_fds(_socks_fd);
-    throw std::runtime_error("socket failed");
+    throw std::runtime_error("fcntl failed");
   }
   if (fcntl(new_socket_fd, F_SETFL, flags | O_NONBLOCK) == -1) {
     close_fds(_socks_fd);
-    throw std::runtime_error("socket failed");
+    throw std::runtime_error("fcntl failed");
   }
 #endif
 
