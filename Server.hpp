@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 22:00:02 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/18 14:36:02 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/18 16:04:32 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,24 +33,17 @@
 
 class Server {
 
-	public:
-		//Constructer, it creates the non-blocking socket connection, listen to the ip/port from settings
-		//	calling socket, setsockopt, bind, listen
-		//  put socket fds into pfs
-		Server(std::vector<Settings> & servers);
-		~Server();
-		//member methods
+public:
+	//Constructer, it creates the non-blocking socket connection, listen to the ip/port from settings
+	//	calling socket, setsockopt, bind, listen
+	//  put socket fds into pfs
+	Server(std::vector<Settings> & servers);
+	~Server();
+	//member methods
 
-		//	Start waiting for events
-		//		calling poll, accept, recv, send
-		void	run();
-
-		//exceptions
-		class AlreadyConstructed: public std::exception {
-			public:
-				//The server instance is already constructed.
-				virtual const char* what() const throw();
-		};
+	//	Start waiting for events
+	//		calling poll, accept, recv, send
+	void	run();
 
 private:
 	static bool _constructed;
@@ -58,13 +51,17 @@ private:
 	std::vector< struct pollfd > _cur_poll_fds;
 	std::vector< struct pollfd > _next_poll_fds;
 	std::vector< Settings > &_settings;
+	std::vector<t_state> _states;
 
-	// functions
-	void	read_request();		// open the requested file in the end
-	
-	void	send_response();
-	void	read_file();
-	void	fork_cgi();
-	void	read_cgi();
+	// Stages would block
+	void	read_request(t_state &, const struct pollfd & pfd);		// open the requested file in the end
+	void	send_response(t_state &, const struct pollfd & pfd);
+	void	read_file(t_state &, const struct pollfd & pfd);
+	void	fork_cgi(t_state &, const struct pollfd & pfd);
+	void	read_cgi(t_state &, const struct pollfd & pfd);
+
+	// funcs
+	void	new_conn_stage(t_state &, const struct pollfd & pfd);
+	void	run_a_server(std::vector< Settings >::iterator &); // socket, setsockopt, bind, listen
 	
 };

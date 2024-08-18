@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/18 14:56:56 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/18 15:52:22 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <string>
 
 typedef enum e_stage {
+	NEW_CONN,
 	READ_REQUEST,
 	SEND_RESPONSE,
 	READ_FILE,
@@ -32,5 +33,3 @@ typedef struct s_state {
 
 	t_stage		stage;
 } t_state;
-
-void fill_write_buffer(t_state *state, std::string const &response);
