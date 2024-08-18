@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:05:27 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/17 20:47:32 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/17 20:56:08 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ Server::Server(std::vector<Settings> & settings) : _settings(settings) {
 		for (std::vector<Settings>::iterator it = settings.begin(); it != settings.end(); it++) {
 			int new_socket_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
 			if (new_socket_fd < 0) {
-				throw SocketFail();
+				throw std::runtime_error("socket failed");
 			}
 			it->_socket_fd = new_socket_fd;
 			_socks_fd.push_back(new_socket_fd);
@@ -69,16 +69,16 @@ Server::Server(std::vector<Settings> & settings) : _settings(settings) {
 				int on = 1;
 				if (setsockopt(new_socket_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on)) < 0) {
 					close_fds(_socks_fd);
-					throw SetSockOptFail();
+					throw std::runtime_error("setsockopt failed");
 				}
 			}
 			if (bind(new_socket_fd, (struct sockaddr *)&(it->_addr), sizeof(it->_addr)) < 0) {
 				close_fds(_socks_fd);
-				throw BindFail();
+				throw std::runtime_error("bind failed");
 			}
 			if (listen(new_socket_fd, BACK_LOG) < 0) {
 				close_fds(_socks_fd);
-				throw ListenFail();
+				throw std::runtime_error("listen failed");
 			}
 			// Setting up sockets for poll
 			{
@@ -113,7 +113,7 @@ void	Server::run() {
 	while (1) {
 		nfds = poll(_cur_poll_fds.data(), _cur_poll_fds.size(), -1);
 		if (nfds == -1)
-			throw EpollWaitFail();
+			throw std::runtime_error("poll failed");
 
 		// Process all returned events
 		for (std::vector<struct pollfd>::iterator it = _cur_poll_fds.begin(); it != _cur_poll_fds.end(); it++) {
@@ -173,8 +173,7 @@ void	Server::run() {
 				}
 				else if (it->revents & POLLIN) {
 					int	rc;
-					if (cur_state == states.end())
-						throw std::runtime_error("State not found");
+
 					rc = recv(it->fd, buffer, sizeof(buffer), 0);
 					std::vector<Settings>::iterator targets = _settings.begin();
 					for (; targets != _settings.end(); targets++) {
@@ -218,36 +217,4 @@ Server::~Server() {
 
 const char* Server::AlreadyConstructed::what() const throw() {
 	return "The server instance is already constructed.";
-}
-
-const char* Server::CreatEpollFail::what() const throw() {
-	return "epoll_create() failed.";
-}
-
-const char* Server::EpollCtlFail::what() const throw() {
-	return "epoll_ctl() failed";
-}
-
-const char* Server::EpollWaitFail::what() const throw() {
-	return "epoll_wait() failed";
-}
-
-const char* Server::SocketFail::what() const throw() {
-	return "socket() failed";
-}
-
-const char* Server::SetSockOptFail::what() const throw() {
-	return "setsockopt() failed.";
-}
-
-const char* Server::BindFail::what() const throw() {
-	return "bind() failed.";
-}
-
-const char* Server::ListenFail::what() const throw() {
-	return "listen() failed.";
-}
-
-const char* Server::AcceptFail::what() const throw() {
-	return "accept() failed.";
 }
