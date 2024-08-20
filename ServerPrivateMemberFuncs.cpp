@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
+/*   ServerPrivateMemberFuncs.cpp                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:05:27 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/18 18:02:27 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/20 19:25:34 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,46 @@ void Server::run_a_server(std::vector<Settings>::iterator &it) {
   }
 
   // Setting up sockets for poll
-  add_to_poll(_cur_poll_fds, new_socket_fd);
+  add_to_poll(new_socket_fd);
 }
+
+void Server::new_conns(int sock_fd) {
+  int new_sd;
+  // Accept new connections
+  struct sockaddr_in addr_client;
+  socklen_t client_addr_len = sizeof(addr_client);
+  while ((new_sd = accept(sock_fd, (sockaddr *)&addr_client,
+                          &client_addr_len)) != -1) {
+    struct pollfd new_pfd;
+    bzero(&new_pfd, sizeof(struct pollfd));
+    new_pfd.fd = new_sd;
+    new_pfd.events = POLLIN | POLLHUP | POLLERR;
+    _next_poll_fds.push_back(new_pfd);
+
+    State new_conn;
+    // not finished
+    bzero(&new_conn, sizeof(State));
+    new_conn.stage = &read_request;
+    new_conn.conn_fd = new_sd;
+    new_conn.client_ip = (unsigned char *)&addr_client.sin_addr.s_addr;
+    _states.push_back(new_conn);
+    std::cout << "New connection fd: " << new_conn.conn_fd << std::endl;
+  }
+}
+
+bool Server::is_socket(int fd) {
+  return std::find(_socks_fd.begin(), _socks_fd.end(), fd) == _socks_fd.end() ? false : true;
+}
+
+std::vector<State>::iterator Server::getState(int fd) {
+  for (std::vector<State>::iterator it = _states.begin(); it != _states.end();
+       it++) {
+    if (it->conn_fd == fd || it->file_fd == fd || it->cgi_pipe[1] == fd)
+      return it;
+  }
+  return _states.end();
+}
+
 
 Server::Server(std::vector<Settings> &settings) : _settings(settings) {
   if (_constructed)
@@ -81,8 +119,8 @@ Server::Server(std::vector<Settings> &settings) : _settings(settings) {
 }
 
 void Server::run() {
-  _next_poll_fds = _cur_poll_fds;
   while (1) {
+    _cur_poll_fds = _next_poll_fds;
     int nfds = poll(_cur_poll_fds.data(), _cur_poll_fds.size(), -1);
     if (nfds == -1)
       throw std::runtime_error("poll failed");
@@ -93,126 +131,30 @@ void Server::run() {
       if (it->revents == 0)
         continue;
       // Check if the event is for a server socket
-      if (is_socket(_socks_fd, it->fd))
-        new_conns(_states, _next_poll_fds, it->fd);
+      if (is_socket(it->fd))
+        new_conns(it->fd);
 
       // If the event is not in _socks_fd, handle 5 stages
       else {
-        std::vector<t_state>::iterator cur_state = get_state(_states, it->fd);
+        std::vector<State>::iterator cur_state = getState(it->fd);
 
         if (cur_state == _states.end())
           throw std::runtime_error("State not found");
 
         // Close connection if any error occurs (http/1.1 keeps the connection)
         if (it->revents & (POLLHUP | POLLERR)) {
-          close_conn(it->fd, _next_poll_fds, _states, cur_state);
+          close_conn(it->fd, cur_state);
           continue;
         }
         // if (it->revents & POLLIN)
         // 	std::cout << "Input ready." << std::endl;
         // if (it->revents & POLLOUT)
         // 	std::cout << "Output ready." << std::endl;
-        switch (cur_state->stage) {
-        case NEW_CONN:
-          new_conn_stage(cur_state, *it);
-          break;
-        case READ_REQUEST:
-          read_request(cur_state, *it);
-          break;
-        case SEND_RESPONSE:
-          send_response(cur_state, *it);
-          break;
-        case READ_FILE:
-          read_file(cur_state, *it);
-          break;
-        case FORK_CGI:
-          fork_cgi(cur_state, *it);
-          break;
-        case READ_CGI:
-          read_cgi(cur_state, *it);
-          break;
-        }
+        cur_state->stage(cur_state, *it, *this);
+
       }
     }
-    _cur_poll_fds = _next_poll_fds;
   }
-}
-
-void Server::new_conn_stage(std::vector<t_state>::iterator &state,
-                            const struct pollfd &pfd) {
-  if (pfd.revents & POLLIN) {
-    state->stage = READ_REQUEST;
-    read_request(state, pfd);
-  }
-}
-
-void Server::read_request(std::vector<t_state>::iterator &state,
-                          const struct pollfd &pfd) {
-  if (!(pfd.revents & POLLIN))
-    return;
-
-  char buf[BUFFER_SIZE];
-  ssize_t rc = recv(state->conn_fd, buf, BUFFER_SIZE, MSG_DONTWAIT);
-
-  // < 0 ..> an error occurs, = 0 client closes the connection
-  if (rc <= 0) {
-    close_conn(state->conn_fd, _next_poll_fds, _states, state);
-    return;
-  }
-
-  state->request_buff += buf;
-
-  if (rc < BUFFER_SIZE) {
-    // finish reading, it needs to do something and checks conditions. Below
-    // just for tests:
-    state->req = new Request(buf);
-    state->res = new Response();
-    state->stage = SEND_RESPONSE;
-    std::vector<struct pollfd>::iterator next_pfd =
-        find_it_in_pfds(_next_poll_fds, pfd.fd);
-    next_pfd->events = POLLOUT | POLLHUP | POLLERR;
-  }
-}
-
-void Server::send_response(std::vector<t_state>::iterator &state,
-                           const struct pollfd &pfd) {
-  if (!(pfd.revents & POLLOUT))
-    return;
-
-  static int resStringSentBytes = 0;
-  std::string resString = state->res->generateResponseString();
-  e_methods method = state->req->getMethod();
-  std::string uri = state->req->getUri();
-
-  ssize_t wc = send(state->conn_fd, resString.c_str() + resStringSentBytes,
-                    resString.size() - resStringSentBytes, MSG_DONTWAIT);
-
-  if (wc == (long)resString.size() - resStringSentBytes) {
-    // finish reading, it needs to do something and checks conditions. Below
-    // just for tests:
-    state->stage = NEW_CONN;
-    std::vector<struct pollfd>::iterator next_pfd =
-        find_it_in_pfds(_next_poll_fds, pfd.fd);
-    next_pfd->events = POLLIN | POLLHUP | POLLERR;
-  } else {
-    resStringSentBytes += wc;
-  }
-}
-
-void Server::read_file(std::vector<t_state>::iterator &state,
-                       const struct pollfd &pfd) {
-  (void)state;
-  (void)pfd;
-}
-void Server::fork_cgi(std::vector<t_state>::iterator &state,
-                      const struct pollfd &pfd) {
-  (void)state;
-  (void)pfd;
-}
-void Server::read_cgi(std::vector<t_state>::iterator &state,
-                      const struct pollfd &pfd) {
-  (void)state;
-  (void)pfd;
 }
 
 Server::~Server() { close_fds(_socks_fd); }
