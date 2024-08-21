@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:05:27 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/20 19:25:34 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/21 15:21:46 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ void Server::run_a_server(std::vector<Settings>::iterator &it) {
   }
 
   // Setting up sockets for poll
-  add_to_poll(new_socket_fd);
+  add_to_poll_in(new_socket_fd);
 }
 
 void Server::new_conns(int sock_fd) {
@@ -76,20 +76,9 @@ void Server::new_conns(int sock_fd) {
   socklen_t client_addr_len = sizeof(addr_client);
   while ((new_sd = accept(sock_fd, (sockaddr *)&addr_client,
                           &client_addr_len)) != -1) {
-    struct pollfd new_pfd;
-    bzero(&new_pfd, sizeof(struct pollfd));
-    new_pfd.fd = new_sd;
-    new_pfd.events = POLLIN | POLLHUP | POLLERR;
-    _next_poll_fds.push_back(new_pfd);
+    add_to_poll_in(new_sd);
 
-    State new_conn;
-    // not finished
-    bzero(&new_conn, sizeof(State));
-    new_conn.stage = &read_request;
-    new_conn.conn_fd = new_sd;
-    new_conn.client_ip = (unsigned char *)&addr_client.sin_addr.s_addr;
-    _states.push_back(new_conn);
-    std::cout << "New connection fd: " << new_conn.conn_fd << std::endl;
+    _states.push_back(State(new_sd, (unsigned char *)&addr_client.sin_addr.s_addr));
   }
 }
 
@@ -106,55 +95,5 @@ std::vector<State>::iterator Server::getState(int fd) {
   return _states.end();
 }
 
-
-Server::Server(std::vector<Settings> &settings) : _settings(settings) {
-  if (_constructed)
-    throw std::runtime_error("The server instance already exists");
-  _constructed = true;
-
-  // set socket for all servers, bind and listen.
-  for (std::vector<Settings>::iterator it = _settings.begin();
-       it != _settings.end(); it++)
-    run_a_server(it);
-}
-
-void Server::run() {
-  while (1) {
-    _cur_poll_fds = _next_poll_fds;
-    int nfds = poll(_cur_poll_fds.data(), _cur_poll_fds.size(), -1);
-    if (nfds == -1)
-      throw std::runtime_error("poll failed");
-
-    // Process all returned events
-    for (std::vector<struct pollfd>::iterator it = _cur_poll_fds.begin();
-         it != _cur_poll_fds.end(); it++) {
-      if (it->revents == 0)
-        continue;
-      // Check if the event is for a server socket
-      if (is_socket(it->fd))
-        new_conns(it->fd);
-
-      // If the event is not in _socks_fd, handle 5 stages
-      else {
-        std::vector<State>::iterator cur_state = getState(it->fd);
-
-        if (cur_state == _states.end())
-          throw std::runtime_error("State not found");
-
-        // Close connection if any error occurs (http/1.1 keeps the connection)
-        if (it->revents & (POLLHUP | POLLERR)) {
-          close_conn(it->fd, cur_state);
-          continue;
-        }
-        // if (it->revents & POLLIN)
-        // 	std::cout << "Input ready." << std::endl;
-        // if (it->revents & POLLOUT)
-        // 	std::cout << "Output ready." << std::endl;
-        cur_state->stage(cur_state, *it, *this);
-
-      }
-    }
-  }
-}
 
 Server::~Server() { close_fds(_socks_fd); }

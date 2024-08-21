@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 22:00:02 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/20 18:57:23 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/21 17:02:17 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,19 +37,28 @@ public:
   // Constructer, it creates the non-blocking socket connection, listen to the
   // ip/port from settings 	calling socket, setsockopt, bind, listen
   //   put socket fds into pfs
-  Server(std::vector<Settings> &servers);
+  Server(std::vector<Settings> &servers, char **env);
   ~Server();
+
+  // getters
+  std::vector<struct pollfd>::iterator getNextPfdsEnd();
+  char** get_env();
   // member methods
   void close_conn(int fd, std::vector<State>::iterator &cur_state);
   void new_conns(int sock_fd);
-  void add_to_poll(int fd);
+  void add_to_poll_in(int fd);
+  void add_to_poll_out(int fd);
   std::vector< struct pollfd >::iterator find_it_in_nxt(int fd);
+  ServerConfig & getServerConfig(State &);
+  void remove_from_poll(int fd);
+  
 
   //	Start waiting for events
   //		calling poll, accept, recv, send
   void run();
 
 private:
+  char **_env;
   static bool _constructed;
   std::vector<int> _socks_fd;
   std::vector<struct pollfd> _cur_poll_fds;

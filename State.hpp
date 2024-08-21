@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/20 19:25:17 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/21 16:52:52 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,16 @@
 
 class State {
 public:
-  State();
+  State(int fd, unsigned char * client_addr);
 
   std::string request_buff;
-  std::string response_buff;
   std::string file_buff;
+
+  std::string response_buff;
+  long bytes_sent;
+
+  std::string file_path; // to call open
+  std::string cgi_path; // to call execve
 
   Request req;
   Response res;
