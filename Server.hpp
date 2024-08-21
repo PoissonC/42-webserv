@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 22:00:02 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/21 17:02:17 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/21 20:07:48 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,9 +71,6 @@ private:
   bool is_socket(int fd);
   std::vector<State>::iterator getState(int fd);
 
-
-  void new_conn_stage(std::vector<State>::iterator &state,
-                      const struct pollfd &pfd);
   void run_a_server(
       std::vector<Settings>::iterator &); // socket, setsockopt, bind, listen
 };

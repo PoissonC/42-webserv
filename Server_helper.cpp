@@ -7,17 +7,34 @@ void close_fds(std::vector<int> &fds) {
   }
 }
 
-void wait_to_respond(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
-  state->stage = &send_response;
+void poll_to_out(int fd, Server & server) {
   std::vector<struct pollfd>::iterator next_pfd =
-      server.find_it_in_nxt(pfd.fd);
+      server.find_it_in_nxt(fd);
   // if the fd is not in the poll array
   if (next_pfd == server.getNextPfdsEnd()) {
-    server.add_to_poll_out(state->conn_fd);
+    server.add_to_poll_out(fd);
     return;
   }
   // else
   next_pfd->events = POLLOUT | POLLHUP | POLLERR;
+}
+
+void poll_to_in(int fd, Server & server) {
+  std::vector<struct pollfd>::iterator next_pfd =
+      server.find_it_in_nxt(fd);
+  // if the fd is not in the poll array
+  if (next_pfd == server.getNextPfdsEnd()) {
+    server.add_to_poll_in(fd);
+    return;
+  }
+  // else
+  next_pfd->events = POLLIN | POLLHUP | POLLERR;
+}
+
+void wait_to_save_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
+  state->stage = &save_file;
+  server.remove_from_poll(state->conn_fd);
+  server.add_to_poll_out(state->file_fd);
 }
 
 void wait_to_read_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {

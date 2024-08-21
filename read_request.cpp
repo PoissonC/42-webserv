@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:29 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/21 17:23:26 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/21 20:14:55 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,20 +15,33 @@ class Server;
 #include "MiddleStages.hpp"
 #include "Server_helper.hpp"
 
-static void handle_read_file(std::vector<State>::iterator & state, const struct pollfd & pfd, Server & server) {
+static void handle_read_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
   state->file_fd = open(state->file_path.c_str(), O_RDONLY);
   if (state->file_fd < 0) {
     // TODO: handle error
-    wait_to_respond(state, pfd, server);
+    state->stage = &send_response;
+    poll_to_out(state->conn_fd, server);
     return;
   }
   wait_to_read_file(state, pfd, server);
 }
 
-static void handle_cgi(std::vector<State>::iterator & state, const struct pollfd & pfd, Server & server) {
+static void handle_save_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
+  state->file_fd = open(state->file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  if (state->file_fd < 0) {
+    // TODO: handle error
+    state->stage = &send_response;
+    poll_to_out(state->conn_fd, server);
+    return;
+  }
+  wait_to_save_file(state, pfd, server);
+}
+
+static void handle_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
   if (pipe(state->cgi_pipe) < 0) {
     // TODO: handle error
-    wait_to_respond(state, pfd, server);
+    state->stage = &send_response;
+    poll_to_out(state->conn_fd, server);
     return;
   }
   wait_cgi(state, pfd, server);
@@ -47,7 +60,7 @@ static void handle_cgi(std::vector<State>::iterator & state, const struct pollfd
   }
 }
 
-void read_request(std::vector<State>::iterator & state, const struct pollfd & pfd, Server & server) {
+void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
   if (!(pfd.revents & POLLIN))
     return;
 
@@ -66,7 +79,8 @@ void read_request(std::vector<State>::iterator & state, const struct pollfd & pf
     // finish reading, it needs to do something and checks conditions. Below
     // just for tests:
     state->req = Request(buf);
-    wait_to_respond(state, pfd, server);
+    state->stage = &send_response;
+    poll_to_out(state->conn_fd, server);
     return;
     // above needs to be removed
 
@@ -75,13 +89,14 @@ void read_request(std::vector<State>::iterator & state, const struct pollfd & pf
       TODO: check the config file and decide which case to handle
       Jeremy's job
     */
-   func(serverConfig)
-    server.getServerConfig(*state);
+
 
 
 
     // if we need to return a file:
     handle_read_file(state, pfd, server);
+    // if we need to save a uploaded file:
+    handle_save_file(state, pfd, server);
     // if we need to call cgi
     handle_cgi(state, pfd, server);
 
