@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   read_request.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jhurpy <jhurpy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:29 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/21 17:23:26 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/23 19:41:45 by jhurpy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,11 @@ void read_request(std::vector<State>::iterator & state, const struct pollfd & pf
       TODO: check the config file and decide which case to handle
       Jeremy's job
     */
-   func(serverConfig)
+    // Function will compare the request with the server config
+	select_server(*state);
+    //func(serverConfig);
+
+
     server.getServerConfig(*state);
 
 
