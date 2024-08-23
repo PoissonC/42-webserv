@@ -6,7 +6,7 @@
 /*   By: jhurpy <jhurpy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:29 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/23 19:41:45 by jhurpy           ###   ########.fr       */
+/*   Updated: 2024/08/23 23:23:20 by jhurpy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ void read_request(std::vector<State>::iterator & state, const struct pollfd & pf
       Jeremy's job
     */
     // Function will compare the request with the server config
-	select_server(*state);
+	select_server(*state, server);
     //func(serverConfig);
 
 
