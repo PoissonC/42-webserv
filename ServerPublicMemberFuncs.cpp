@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:08:17 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/21 17:04:07 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/21 19:30:30 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,9 +57,20 @@ std::vector<struct pollfd>::iterator Server::find_it_in_nxt(int fd) {
 }
 
 ServerConfig & Server::getServerConfig(State & state) {
-  for(std::vector<Settings>::iterator settings_it = _settings.begin(); settings_it != settings_it.end(); settings_it++) {
-
+  for(std::vector<Settings>::iterator settings_it = _settings.begin(); settings_it != _settings.end(); settings_it++) {
+    if (state.sock_fd == settings_it->_socket_fd) {
+      for (std::vector<ServerConfig>::iterator server_it = settings_it->_servers.begin(); server_it != settings_it->_servers.end(); server_it++) {
+        std::vector<std::string> server_names = server_it->getServerNames();
+        for (std::vector<std::string>::iterator server_name = server_names.begin(); server_name != server_names.end(); server_name++) {
+          // TODO: server must have a function to return the server name, replace the getUri with getServerName
+          if (state.req.getUri() == *server_name)
+            return *server_it;
+        }
+        return *(settings_it->_servers.begin());
+      }
+    }
   }
+  throw std::runtime_error("Not Possible");
 }
 
 char** Server::get_env() {

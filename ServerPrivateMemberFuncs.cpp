@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:05:27 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/21 15:21:46 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/21 19:14:43 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ void Server::new_conns(int sock_fd) {
                           &client_addr_len)) != -1) {
     add_to_poll_in(new_sd);
 
-    _states.push_back(State(new_sd, (unsigned char *)&addr_client.sin_addr.s_addr));
+    _states.push_back(State(new_sd, (unsigned char *)&addr_client.sin_addr.s_addr, sock_fd));
   }
 }
 

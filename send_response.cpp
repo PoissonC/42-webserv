@@ -6,11 +6,12 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/21 16:55:12 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/21 20:16:45 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "MiddleStages.hpp"
+#include "Server_helper.hpp"
 
 void send_response(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
   if (!(pfd.revents & POLLOUT))
@@ -24,12 +25,9 @@ void send_response(std::vector<State>::iterator &state, const struct pollfd &pfd
 
   if (wc == (long)state->response_buff.size() - state->bytes_sent) {
     state->stage = &read_request;
-    std::vector<struct pollfd>::iterator next_pfd =
-        server.find_it_in_nxt(pfd.fd);
-    next_pfd->events = POLLIN | POLLHUP | POLLERR;
-    std::cout << state->response_buff << std::endl;
+    poll_to_in(state->conn_fd, server);
+    state->bytes_sent = 0;
   } else {
     state->bytes_sent += wc;
   }
-
 }
