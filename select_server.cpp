@@ -6,38 +6,38 @@
 /*   By: jhurpy <jhurpy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/23 18:06:50 by jhurpy            #+#    #+#             */
-/*   Updated: 2024/08/23 19:43:44 by jhurpy           ###   ########.fr       */
+/*   Updated: 2024/08/23 23:28:36 by jhurpy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "Server.hpp"
 # include "ServerConfig.hpp"
+# include "Server.hpp"
 # include "State.hpp"
 
-static ServerConfig * compare_server_name(State & state)
-{
-	// compare server name with the host
-	// initialize the server config with the first server because it is the default server
-	ServerConfig *server = state.server_config[0]; // TODO define the way to access this data
-	for (std::vector<ServerConfig>::iterator it = state.server_config.begin(); it != state.server_config.end(); it++)
-	{
-		if (it->getServerNames().empty())
-			server = *it;
-		else
-		{
-			for (std::vector<std::string>::iterator it2 = it->getServerNames().begin(); it2 != it->getServerNames().end(); it2++)
-			{
-				if (*it2 == state.req.getHeaders().find("Host")->second)
-				{
-					server = *it;
-					break;
-				}
-			}
-		}
-	}
-	return server;
+//static ServerConfig * compare_server_name(State & state)
+//{
+//	// compare server name with the host
+//	// initialize the server config with the first server because it is the default server
+//	ServerConfig *server = state.server_config[0]; // TODO define the way to access this data
+//	for (std::vector<ServerConfig>::iterator it = state.server_config.begin(); it != state.server_config.end(); it++)
+//	{
+//		if (it->getServerNames().empty())
+//			server = *it;
+//		else
+//		{
+//			for (std::vector<std::string>::iterator it2 = it->getServerNames().begin(); it2 != it->getServerNames().end(); it2++)
+//			{
+//				if (*it2 == state.req.getHeaders().find("Host")->second)
+//				{
+//					server = *it;
+//					break;
+//				}
+//			}
+//		}
+//	}
+//	return server;
 
-}
+//}
 
 static void compare_method(State & state, LocationConfig * location)
 {
@@ -49,11 +49,11 @@ static void compare_method(State & state, LocationConfig * location)
 	}
 }
 
-static LocationConfig * compare_location(State & state, ServerConfig * server)
+static LocationConfig * compare_location(State & state, ServerConfig server)
 {
 	// compare location with the path
 	std::string path = state.req.getUriComponents().path;
-	std::map<std::string, LocationConfig> locations = server->getLocations();
+	std::map<std::string, LocationConfig> locations = server.getLocations();
 	LocationConfig *location = NULL;
 	for (std::map<std::string, LocationConfig>::iterator it = locations.begin(); it != locations.end(); it++)
 	{
@@ -77,13 +77,14 @@ static LocationConfig * compare_location(State & state, ServerConfig * server)
 	return location;
 }
 
-void select_server(State & state)
+void select_server(State & state, Server & server)
 {
-	ServerConfig *server = compare_server_name(state);
-	if (server->getServerNames().empty())
-		state.res.setStatusCode(404);
+	//ServerConfig *server = compare_server_name(state);
+	ServerConfig serverConf = server.getServerConfig(state);
+	if (serverConf.getServerNames().empty())
+		state.res.setStatusCode(404); // confirm if this is relevant regarding the config file
 	if (state.res.getStatusCode() == 200)
-		LocationConfig *location = compare_location(state, server);
+		LocationConfig *location = compare_location(state, serverConf);
 	if (state.res.getStatusCode() == 200)
 	{
 		// handle if path is for file_path or cgi_path
