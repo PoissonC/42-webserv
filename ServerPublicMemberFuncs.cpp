@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerPublicMemberFuncs.cpp                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jhurpy <jhurpy@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:08:17 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/24 01:01:06 by jhurpy           ###   ########.fr       */
+/*   Updated: 2024/08/24 18:01:47 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,21 +56,23 @@ std::vector<struct pollfd>::iterator Server::find_it_in_nxt(int fd) {
   return _next_poll_fds.end();
 }
 
-ServerConfig & Server::getServerConfig(State & state) {
+void Server::getServerConfig(State & state) {
   std::string host = state.req.getHeaders().find("Host")->second;
   for(std::vector<Settings>::iterator settings_it = _settings.begin(); settings_it != _settings.end(); settings_it++) {
     if (state.sock_fd == settings_it->_socket_fd) {
       for (std::vector<ServerConfig>::iterator server_it = settings_it->_servers.begin(); server_it != settings_it->_servers.end(); server_it++) {
         std::vector<std::string> server_names = server_it->getServerNames();
         for (std::vector<std::string>::iterator server_name = server_names.begin(); server_name != server_names.end(); server_name++) {
-          if (host == *server_name)
-            return *server_it;
+          if (host == *server_name) {
+            state.server = *server_it;
+            return;
+          }
         }
-        return *(settings_it->_servers.begin());
+        state.server = *(settings_it->_servers.begin());
+        return;
       }
     }
   }
-  throw std::runtime_error("Not Possible");
 }
 
 char** Server::get_env() {
@@ -83,7 +85,7 @@ void Server::remove_from_poll(int fd) {
 }
 
 
-Server::Server(std::vector<Settings> &settings, char **env) : _settings(settings), _env(env) {
+Server::Server(std::vector<Settings> &settings, char **env) :  _env(env), _settings(settings) {
   if (_constructed)
     throw std::runtime_error("The server instance already exists");
   _constructed = true;

@@ -31,21 +31,21 @@ void poll_to_in(int fd, Server & server) {
   next_pfd->events = POLLIN | POLLHUP | POLLERR;
 }
 
-void wait_to_save_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
-  state->stage = &save_file;
-  server.remove_from_poll(state->conn_fd);
-  server.add_to_poll_out(state->file_fd);
+void wait_to_save_file(State &state, Server & server) {
+  state.stage = &save_file;
+  server.remove_from_poll(state.conn_fd);
+  server.add_to_poll_out(state.file_fd);
 }
 
-void wait_to_read_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
-  state->stage = &read_file;
-  server.remove_from_poll(state->conn_fd);
-  server.add_to_poll_in(state->file_fd);
+void wait_to_read_file(State &state, Server & server) {
+  state.stage = &read_file;
+  server.remove_from_poll(state.conn_fd);
+  server.add_to_poll_in(state.file_fd);
 }
 
-void wait_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
-  state->stage = &read_cgi;
-  server.remove_from_poll(state->conn_fd);
-  server.add_to_poll_in(state->cgi_pipe[0]);
+void wait_cgi(State &state, Server & server) {
+  state.stage = &read_cgi;
+  server.remove_from_poll(state.conn_fd);
+  server.add_to_poll_in(state.cgi_pipe[0]);
 }
 

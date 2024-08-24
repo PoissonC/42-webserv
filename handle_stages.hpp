@@ -1,17 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   State.cpp                                          :+:      :+:    :+:   */
+/*   handle_stages.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/24 17:13:41 by ychen2           ###   ########.fr       */
+/*   Created: 2024/08/24 17:17:12 by ychen2            #+#    #+#             */
+/*   Updated: 2024/08/24 17:38:07 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "State.hpp"
+#pragma once
 
-State::State(int fd, unsigned char * client_addr, int socket): bytes_sent(0), req(std::string()), client_ip(client_addr), sock_fd(socket) , conn_fd(fd), stage(&read_request) {
-  std::cout << "New connection fd: " << fd << std::endl;
-}
+#include "MiddleStages.hpp"
+#include "Server_helper.hpp"
+
+void handle_read_file(State &state, Server & server);
+void handle_save_file(State &state, Server & server);
+void handle_cgi(State &state, Server & server);

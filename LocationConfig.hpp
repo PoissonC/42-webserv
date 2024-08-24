@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   LocationConfig.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yu <yu@student.42.fr>                      +#+  +:+       +#+        */
+/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 10:44:50 by yu                #+#    #+#             */
-/*   Updated: 2024/05/20 02:01:32 by yu               ###   ########.fr       */
+/*   Updated: 2024/08/24 17:08:56 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ typedef enum {
 	GET = 0,
 	POST,
 	DELETE,
+	ERROR
 } e_methods;
 
 class LocationConfig {
