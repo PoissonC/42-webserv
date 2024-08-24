@@ -1,6 +1,6 @@
 # Compiler and flags
 CC 			= c++
-CFLAGS 		= -std=c++98 #-Wall -Wextra -Werror #-fsanitize=address
+CFLAGS 		= -std=c++98 -Wall -Wextra -Werror #-fsanitize=address
 
 # Directories
 OBJ_DIR		= obj/
@@ -8,7 +8,7 @@ OBJ_DIR		= obj/
 # Sources and objects
 SRC 		= main.cpp ServerPrivateMemberFuncs.cpp ServerPublicMemberFuncs.cpp Server_helper.cpp Settings.cpp \
 				ServerConfig.cpp LocationConfig.cpp State.cpp \
-				parser.cpp Request.cpp Response.cpp \
+				parser.cpp Request.cpp Response.cpp select_config.cpp handle_stages.cpp\
 				read_request.cpp send_response.cpp read_file.cpp read_cgi.cpp save_file.cpp
 OBJ 		= $(SRC:%.cpp=$(OBJ_DIR)%.o)
 HDR 		= Server.hpp Server_helper.hpp Settings.hpp State.hpp ServerConfig.hpp \

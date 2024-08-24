@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/21 20:16:45 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/24 18:27:59 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ void send_response(std::vector<State>::iterator &state, const struct pollfd &pfd
     return;
 
   // For test:
-  state->response_buff = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 13\n\nHello World!\n";
+  // state->response_buff = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 13\n\nHello World!\n";
   // 
   ssize_t wc = send(state->conn_fd, state->response_buff.c_str() + state->bytes_sent,
                     state->response_buff.size() - state->bytes_sent, MSG_DONTWAIT);

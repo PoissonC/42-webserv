@@ -151,6 +151,10 @@ int Request::checkRequest() {
     if (hostUri != hostHeader)
       return (400);
   }
+  for (unsigned long i = 0; i < _uriComponents.path.size() - 1; i++) {
+    if (_uriComponents.path[i] == '/' && _uriComponents.path[i + 1] == '/')
+      return (400);
+  }
   return (200);
 }
 
@@ -159,10 +163,10 @@ e_methods Request::getMethod() const {
     return (GET);
   if (this->_method == "POST")
     return (POST);
-  else {
-    std::cout << this->_method << std::endl;
+  if (this->_method == "DELETE")
     return (DELETE);
-  }
+  else
+    return (ERROR);
 }
 
 std::string Request::getUri() const { return (this->_uri); }

@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/21 20:03:07 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/24 18:03:12 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "MiddleStages.hpp"
+#include "ServerConfig.hpp"
 
 class State {
 public:
@@ -26,6 +27,7 @@ public:
   std::string response_buff;
   long bytes_sent;
 
+  std::string original_path; // to call open
   std::string file_path; // to call open
   std::string cgi_path; // to call execve
 
@@ -38,4 +40,7 @@ public:
   int sock_fd, conn_fd, file_fd;
   void (*stage)(std::vector<State>::iterator &, const struct pollfd &, Server &);
 
+
+  ServerConfig  server;
+  LocationConfig  loc;
 };

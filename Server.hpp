@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 22:00:02 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/21 20:07:48 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/24 18:01:58 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ public:
   void add_to_poll_in(int fd);
   void add_to_poll_out(int fd);
   std::vector< struct pollfd >::iterator find_it_in_nxt(int fd);
-  ServerConfig & getServerConfig(State &);
+  void getServerConfig(State &);
   void remove_from_poll(int fd);
   
 

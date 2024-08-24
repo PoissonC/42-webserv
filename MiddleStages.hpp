@@ -5,10 +5,11 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/20 18:22:54 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/21 20:04:05 by ychen2           ###   ########.fr       */
+/*   Created: Invalid date        by                   #+#    #+#             */
+/*   Updated: 2024/08/26 14:35:40 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #pragma once
 
@@ -23,3 +24,4 @@ void send_response(std::vector<State>::iterator &state, const struct pollfd &pfd
 void read_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server);
 void save_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server);
 void read_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server);
+
