@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yu <yu@student.42.fr>                      +#+  +:+       +#+        */
+/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:04:57 by ychen2            #+#    #+#             */
-/*   Updated: 2024/05/30 18:11:57 by yu               ###   ########.fr       */
+/*   Updated: 2024/08/21 15:19:43 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include <cstdio>
 #include <iostream>
 
-int main(int ac, char **av) {
+int main(int ac, char **av, char **env) {
 	if (ac != 2 && ac != 1) {
 		std::cerr << "Usage: " << av[0] << " <config file>(optional)" << std::endl;
 		return 1;
@@ -27,7 +27,7 @@ int main(int ac, char **av) {
 			filename = av[1];
 		std::vector< Settings > settings;
 		parse(settings, filename);
-		Server server(settings);
+		Server server(settings, env);
 		server.run();
 	} catch (std::exception &e) {
 		if (errno != 0)
