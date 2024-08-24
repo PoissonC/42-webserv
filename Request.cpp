@@ -93,27 +93,25 @@ void Request::_parseUri(std::string uri, uriComponents &uriComponents) {
     uriComponents.scheme = uriParse.substr(0, pos);
     uriParse.erase(0, pos + 3);
   }
-  pos = uriParse.find(":");
-  if (pos != std::string::npos) {
-    uriComponents.host = uriParse.substr(0, pos);
-    uriParse.erase(0, pos + 1);
-  }
   pos = uriParse.find("/");
   if (pos != std::string::npos) {
-    if (uriComponents.host.empty())
-      uriComponents.host = uriParse.substr(0, pos);
-    else
-      uriComponents.port = uriParse.substr(0, pos);
-    uriParse.erase(0, pos + 1);
-  } else if (uriComponents.host.empty()) {
+    uriComponents.host = uriParse.substr(0, pos);
+    uriParse.erase(0, pos);
+  } else {
     uriComponents.host = uriParse;
     uriParse = "";
   }
-  if (uriParse.empty()) {
-    uriComponents.path = "/";
-  } else {
-    uriComponents.path = "/" + uriParse;
+  pos = uriComponents.host.find(":");
+  if (pos != std::string::npos) {
+    uriComponents.port = uriComponents.host.substr(pos + 1);
+    uriComponents.host = uriComponents.host.substr(0, pos);
   }
+  if (!uriParse.empty()) {
+    uriComponents.path = uriParse;
+  } else {
+    uriComponents.path = "/";
+  }
+
   uriParse = query;
   pos = uriParse.find("#");
   if (pos != std::string::npos) {
