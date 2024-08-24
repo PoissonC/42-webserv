@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/24 18:27:59 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/24 20:20:10 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ void send_response(std::vector<State>::iterator &state, const struct pollfd &pfd
     state->stage = &read_request;
     poll_to_in(state->conn_fd, server);
     state->bytes_sent = 0;
+    state->request_buff = std::string();
   } else {
     state->bytes_sent += wc;
   }
