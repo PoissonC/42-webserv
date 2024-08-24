@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/23 18:06:50 by jhurpy            #+#    #+#             */
-/*   Updated: 2024/08/24 19:14:55 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/24 20:17:50 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ static bool compare_method(State & state, LocationConfig & location)
 static LocationConfig & compare_location(State & state, std::map< std::string, LocationConfig > & locationMap)
 {
     std::string path = state.req.getUriComponents().path;
+		std::cout << "The whole path in uri: " << path << std::endl;
     
     while (!path.empty())
     {

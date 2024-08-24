@@ -6,14 +6,14 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/24 18:42:47 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/24 20:15:12 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "MiddleStages.hpp"
 #include "Server_helper.hpp"
 
-void read_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
+void  read_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
   if (!(pfd.revents & POLLIN))
     return;
   char buf[BUFFER_SIZE];
