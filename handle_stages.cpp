@@ -6,16 +6,20 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/24 19:11:52 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/24 19:58:08 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "handle_stages.hpp"
 
+std::string getMimeType(const std::string& fileName);
+
 static void check_index(State & state) {
   std::vector<std::string> indices = state.loc.getIndex();
   for (std::vector<std::string>::iterator it = indices.begin(); it != indices.end(); it++) {
-    state.file_fd = open((state.file_path + "/" + *it).c_str(), O_RDONLY);
+    std::string tar = state.file_path + "/" + *it;
+    state.file_fd = open(tar.c_str(), O_RDONLY);
+    state.res.setHeader("Content-Type", getMimeType(tar));
     if (state.file_fd > 0)
       return;
   }
@@ -27,8 +31,10 @@ void handle_read_file(State & state, Server & server) {
     
     check_index(state);
   }
-  else
+  else {
     state.file_fd = open(state.file_path.c_str(), O_RDONLY);
+    state.res.setHeader("Content-Type", getMimeType(state.file_path));
+  }
   if (state.file_fd < 0) {
     // TODO: handle error
     std::cout << "Failed to open file." << std::endl;
