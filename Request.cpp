@@ -20,10 +20,13 @@ Request::Request(const std::string &request) : _req(request) {
 
 Request::~Request() {
   // destructor
-  for (size_t i = 0; this->_envCGI[i] != NULL; i++) {
-	free(this->_envCGI[i]);
+  if (this->_envCGI)
+  {
+	for (size_t i = 0; this->_envCGI[i] != NULL; i++) {
+	  free(this->_envCGI[i]);
+	}
+	delete[] this->_envCGI;
   }
-  delete[] this->_envCGI;
 }
 
 void Request::parse() {
