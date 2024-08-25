@@ -14,11 +14,16 @@ Request::Request(const std::string &request) : _req(request) {
   this->_uriComponents.path = "";
   this->_uriComponents.query = "";
   this->_uriComponents.fragment = "";
+  this->_envCGI = NULL;
   parse();
 }
 
 Request::~Request() {
   // destructor
+  for (size_t i = 0; this->_envCGI[i] != NULL; i++) {
+	free(this->_envCGI[i]);
+  }
+  delete[] this->_envCGI;
 }
 
 void Request::parse() {
@@ -181,4 +186,29 @@ std::string Request::getBody() const { return (this->_body); }
 
 uriComponents Request::getUriComponents() const {
   return (this->_uriComponents);
+}
+
+void Request::setEnvCGI(const std::string cgiPath, const char ** env) {
+
+  std::vector<std::string> envCGI;
+  while (*env) {
+	envCGI.push_back(*env);
+	env++;
+  }
+  envCGI.push_back("REQUEST_METHOD=" + _method);
+  envCGI.push_back("QUERY_STRING=" + _uriComponents.query);
+  envCGI.push_back("CONTENT_TYPE=" + _headers.find("Content-Type")->second);
+  envCGI.push_back("CONTENT_LENGTH=" + _headers.find("Content-Length")->second);
+  envCGI.push_back("PATH_INFO=" + cgiPath);
+
+  char **envCGIChar = new char *[envCGI.size() + 1];
+  for (size_t i = 0; i < envCGI.size(); i++) {
+	envCGIChar[i] = strdup(envCGI[i].c_str());
+  }
+  envCGIChar[envCGI.size()] = NULL;
+  this->_envCGI = envCGIChar;
+}
+
+char ** Request::getEnvCGI() const {
+  return (this->_envCGI);
 }
