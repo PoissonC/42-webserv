@@ -195,11 +195,16 @@ void Request::setEnvCGI(const std::string cgiPath, const char ** env) {
 	envCGI.push_back(*env);
 	env++;
   }
-  envCGI.push_back("REQUEST_METHOD=" + _method);
-  envCGI.push_back("QUERY_STRING=" + _uriComponents.query);
-  envCGI.push_back("CONTENT_TYPE=" + _headers.find("Content-Type")->second);
-  envCGI.push_back("CONTENT_LENGTH=" + _headers.find("Content-Length")->second);
-  envCGI.push_back("PATH_INFO=" + cgiPath);
+
+	if (!_method.empty())
+		envCGI.push_back("REQUEST_METHOD=" + _method);
+	if (!_uri.empty())
+		envCGI.push_back("QUERY_STRING=" + _uriComponents.query);
+	if (_headers.find("Content-Type") != _headers.end())
+		envCGI.push_back("CONTENT_TYPE=" + _headers.find("Content-Type")->second);
+	if (_headers.find("Content-Length") != _headers.end())
+		envCGI.push_back("CONTENT_LENGTH=" + _headers.find("Content-Length")->second);
+	envCGI.push_back("PATH_INFO=" + cgiPath);
 
   char **envCGIChar = new char *[envCGI.size() + 1];
   for (size_t i = 0; i < envCGI.size(); i++) {
