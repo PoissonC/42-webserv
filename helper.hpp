@@ -1,22 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   handle_stages.hpp                                  :+:      :+:    :+:   */
+/*   helper.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/24 17:17:12 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/25 18:47:59 by ychen2           ###   ########.fr       */
+/*   Created: 2024/08/25 21:12:13 by ychen2            #+#    #+#             */
+/*   Updated: 2024/08/25 21:13:35 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "MiddleStages.hpp"
-#include "Server_helper.hpp"
+#include <map>
+#include <cctype>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <sstream>
+#include <fstream>
+#include <exception>
 
-void handle_read_file(State &state, Server & server);
-void handle_save_file(State &state, Server & server);
-void handle_cgi(State &state, Server & server);
-void handle_delete_file(State & state, Server & server);
-void exe_cgi(State & state, Server & server);
+std::string getMimeType(const std::string& fileName);
+std::vector<std::string> split(const std::string &str, char delimiter);
+std::string find_cgi_path(const std::string &program);

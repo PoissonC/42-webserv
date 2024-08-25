@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/24 21:43:42 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 18:45:33 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,7 @@ void  read_file(std::vector<State>::iterator &state, const struct pollfd &pfd, S
     server.remove_from_poll(state->file_fd);
     // The second time error occurs
     if (state->res.getStatusCode() != 200) {
-      state->stage = &send_response;
-      state->response_buff = state->res.generateResponseString();
-      poll_to_out(state->conn_fd, server);
+      wait_to_send_resonpse(*state, server);
       return;
     }
     handle_error_response(*state, 500, "Read file failed.", server);
@@ -44,9 +42,7 @@ void  read_file(std::vector<State>::iterator &state, const struct pollfd &pfd, S
     server.remove_from_poll(state->file_fd);
     // TODO: Generate the response along with the file content
     state->res.setBody(state->file_buff);
-    state->response_buff = state->res.generateResponseString();
-    state->stage = &send_response;
-    poll_to_out(state->conn_fd, server);
     state->file_buff = std::string();
+    wait_to_send_resonpse(*state, server);
   }
 }

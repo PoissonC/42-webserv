@@ -1,6 +1,53 @@
-#include <string>
-#include <map>
-#include <cctype>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   helper.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/25 21:11:22 by ychen2            #+#    #+#             */
+/*   Updated: 2024/08/25 21:16:19 by ychen2           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "helper.hpp"
+
+// Function to split a string by a delimiter
+std::vector<std::string> split(const std::string &str, char delimiter) {
+  std::vector<std::string> tokens;
+  std::string token;
+  std::istringstream tokenStream(str);
+
+  while (std::getline(tokenStream, token, delimiter)) {
+      tokens.push_back(token);
+  }
+
+  return tokens;
+}
+
+// Function to check if a file is executable
+bool isExecutable(const std::string &path) {
+  struct stat sb;
+  return (stat(path.c_str(), &sb) == 0 && sb.st_mode & S_IXUSR);
+}
+
+// Function to find the full path of the program
+std::string find_cgi_path(const std::string &program) {
+  const char *pathEnv = std::getenv("PATH");
+  if (!pathEnv) {
+    throw std::runtime_error("PATH environment variable not found.\n");
+  }
+  std::string pathStr(pathEnv);
+  std::vector<std::string> directories = split(pathStr, ':');
+
+  for (std::vector<std::string>::iterator it = directories.begin(); it != directories.end(); ++it) {
+      std::string fullPath = *it + "/" + program;
+      if (isExecutable(fullPath)) {
+          return fullPath;
+      }
+  }
+  throw std::runtime_error("Program not found.\n");
+}
 
 std::string getMimeType(const std::string& fileName) {
     // Define the MIME types using a map

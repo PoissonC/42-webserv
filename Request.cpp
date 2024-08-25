@@ -185,7 +185,7 @@ uriComponents Request::getUriComponents() const {
   return (this->_uriComponents);
 }
 
-void Request::setEnvCGI(State & state, const char ** env) {
+void Request::setEnvCGI(State & state, char ** env) {
 
   while (*env) {
 	_envCGI.push_back(*env);

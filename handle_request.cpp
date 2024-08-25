@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/23 18:06:50 by jhurpy            #+#    #+#             */
-/*   Updated: 2024/08/25 15:10:27 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 17:38:10 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,8 @@ void handle_request(State & state, Server & server)
 								std::cout << "original_path: " << state.original_path << std::endl;
 								std::cout << "root of location: " << state.loc.getRoot() << std::endl;
 	if (state.loc.getCgiPass().size() > 0) {
-		state.cgi_path = state.loc.getCgiPass();
+		state.cgi_path = state.loc.getRoot() + state.loc.getCgiPass() + state.original_path;
+								std::cout << "Full CGI path: " << state.cgi_path << std::endl;
 		handle_cgi(state, server);
 		return;
 	}
@@ -77,9 +78,17 @@ void handle_request(State & state, Server & server)
 		handle_read_file(state, server);
 	}
 	else if (state.req.getMethod() == POST) {
+		if (state.file_path.find("../") != std::string::npos) {
+			handle_error_response(state, 400, "Invalid file path.", server);
+			return;
+		}
 		handle_save_file(state, server);
 	}
 	else if (state.req.getMethod() == DELETE) {
+		if (state.file_path.find("../") != std::string::npos) {
+			handle_error_response(state, 400, "Invalid file path.", server);
+			return;
+		}
 		handle_delete_file(state, server);
 	}
 }
