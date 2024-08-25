@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/24 18:03:12 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/24 21:21:54 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@
 class State {
 public:
   State(int fd, unsigned char * client_addr, int socket);
+
+  void reset_attrs();
 
   std::string request_buff;
   std::string file_buff;

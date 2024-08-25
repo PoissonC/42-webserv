@@ -6,11 +6,12 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/24 19:58:08 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 14:43:42 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "handle_stages.hpp"
+#include "handle_error_response.hpp"
 
 std::string getMimeType(const std::string& fileName);
 
@@ -37,9 +38,8 @@ void handle_read_file(State & state, Server & server) {
   }
   if (state.file_fd < 0) {
     // TODO: handle error
+    handle_error_response(state, 404, "File not found or can't be opened", server);
     std::cout << "Failed to open file." << std::endl;
-    state.stage = &send_response;
-    poll_to_out(state.conn_fd, server);
     return;
   }
   wait_to_read_file(state, server);
@@ -49,8 +49,7 @@ void handle_save_file(State & state, Server & server) {
   state.file_fd = open(state.file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
   if (state.file_fd < 0) {
     // TODO: handle error
-    state.stage = &send_response;
-    poll_to_out(state.conn_fd, server);
+    handle_error_response(state, 500, "Server can't save the file.", server);
     return;
   }
   wait_to_save_file(state, server);
@@ -59,8 +58,7 @@ void handle_save_file(State & state, Server & server) {
 void handle_cgi(State & state, Server & server) {
   if (pipe(state.cgi_pipe) < 0) {
     // TODO: handle error
-    state.stage = &send_response;
-    poll_to_out(state.conn_fd, server);
+    handle_error_response(state, 500, "Server pipe failed, can't execute the cgi program.", server);
     return;
   }
   wait_cgi(state, server);

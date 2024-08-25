@@ -8,12 +8,13 @@ OBJ_DIR		= obj/
 # Sources and objects
 SRC 		= main.cpp ServerPrivateMemberFuncs.cpp ServerPublicMemberFuncs.cpp Server_helper.cpp Settings.cpp \
 				ServerConfig.cpp LocationConfig.cpp State.cpp \
-				parser.cpp Request.cpp Response.cpp select_config.cpp handle_stages.cpp\
+				parser.cpp Request.cpp Response.cpp handle_request.cpp handle_stages.cpp\
 				read_request.cpp send_response.cpp read_file.cpp read_cgi.cpp save_file.cpp\
-				get_mime.cpp
+				get_mime.cpp handle_error_response.cpp
 OBJ 		= $(SRC:%.cpp=$(OBJ_DIR)%.o)
 HDR 		= Server.hpp Server_helper.hpp Settings.hpp State.hpp ServerConfig.hpp \
-				LocationConfig.hpp parser.hpp Request.hpp Response.hpp MiddleStages.hpp
+				LocationConfig.hpp parser.hpp Request.hpp Response.hpp MiddleStages.hpp \
+				handle_error_response.hpp handle_stages.hpp
 
 NAME = webserv
 

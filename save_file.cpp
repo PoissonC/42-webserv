@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/21 20:07:12 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/24 22:24:04 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ void save_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Se
     close(pfd.fd);
     server.remove_from_poll(pfd.fd);
     // TODO: generates the response to indicate succsess
+    state->res.setBody("File uploaded successfully.\n");
+    state->response_buff = state->res.generateResponseString();
     state->stage = &send_response;
     server.add_to_poll_out(state->conn_fd);
     state->bytes_sent = 0;
