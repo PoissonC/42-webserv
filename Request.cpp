@@ -1,4 +1,5 @@
 #include "Request.hpp"
+#include "State.hpp"
 
 Request::Request(const std::string &request) : _req(request) {
   // constructor will initialize the request variable
@@ -14,19 +15,12 @@ Request::Request(const std::string &request) : _req(request) {
   this->_uriComponents.path = "";
   this->_uriComponents.query = "";
   this->_uriComponents.fragment = "";
-  this->_envCGI = NULL;
+  this->_envCGI = std::vector<std::string>();
   parse();
 }
 
 Request::~Request() {
   // destructor
-  if (this->_envCGI)
-  {
-	for (size_t i = 0; this->_envCGI[i] != NULL; i++) {
-	  free(this->_envCGI[i]);
-	}
-	delete[] this->_envCGI;
-  }
 }
 
 void Request::parse() {
@@ -191,32 +185,49 @@ uriComponents Request::getUriComponents() const {
   return (this->_uriComponents);
 }
 
-void Request::setEnvCGI(const std::string cgiPath, const char ** env) {
+void Request::setEnvCGI(State & state, const char ** env) {
 
-  std::vector<std::string> envCGI;
   while (*env) {
-	envCGI.push_back(*env);
+	_envCGI.push_back(*env);
 	env++;
   }
 
+	_envCGI.push_back("GATEWAY_INTERFACE=CGI/1.1");
+	_envCGI.push_back("SERVER_PROTOCOL=HTTP/1.1");
+	_envCGI.push_back("SERVER_SOFTWARE=MyC++Server/1.0");
+	_envCGI.push_back("REDIRECT_STATUS=200");
 	if (!_method.empty())
-		envCGI.push_back("REQUEST_METHOD=" + _method);
+		_envCGI.push_back("REQUEST_METHOD=" + _method);
 	if (!_uri.empty())
-		envCGI.push_back("QUERY_STRING=" + _uriComponents.query);
+		_envCGI.push_back("REQUEST_URI=" + _uri);
+	if (!_uriComponents.host.empty())
+		_envCGI.push_back("SERVER_NAME=" + _uriComponents.host);
+	if (!_uriComponents.port.empty())
+		_envCGI.push_back("SERVER_PORT=" + _uriComponents.port);
+	if (!_uri.empty())
+		_envCGI.push_back("QUERY_STRING=" + _uriComponents.query);
+	if (!_uriComponents.path.empty())
+		_envCGI.push_back("SCRIPT_NAME=" + _uriComponents.path);
+	if (!_headers.find("Host")->second.empty())
+		_envCGI.push_back("HTTP_HOST=" + _headers.find("Host")->second);
 	if (_headers.find("Content-Type") != _headers.end())
-		envCGI.push_back("CONTENT_TYPE=" + _headers.find("Content-Type")->second);
+		_envCGI.push_back("CONTENT_TYPE=" + _headers.find("Content-Type")->second);
 	if (_headers.find("Content-Length") != _headers.end())
-		envCGI.push_back("CONTENT_LENGTH=" + _headers.find("Content-Length")->second);
-	envCGI.push_back("PATH_INFO=" + cgiPath);
-
-  char **envCGIChar = new char *[envCGI.size() + 1];
-  for (size_t i = 0; i < envCGI.size(); i++) {
-	envCGIChar[i] = strdup(envCGI[i].c_str());
-  }
-  envCGIChar[envCGI.size()] = NULL;
-  this->_envCGI = envCGIChar;
+		_envCGI.push_back("CONTENT_LENGTH=" + _headers.find("Content-Length")->second);
+	_envCGI.push_back("PATH_INFO=" + state.cgi_path);
+	_envCGI.push_back("SCRIPT_FILENAME=" + state.cgi_path);
+	_envCGI.push_back("DOCUMENT_ROOT=" + state.cgi_path);
+	std::string client_ip_str = std::to_string(state.client_ip[0]) + "." + std::to_string(state.client_ip[1]) + "." + std::to_string(state.client_ip[2]) + "." + std::to_string(state.client_ip[3]);
+	_envCGI.push_back("REMOTE_ADDR=" + client_ip_str);
 }
 
 char ** Request::getEnvCGI() const {
-  return (this->_envCGI);
+
+  char **envCGIChar = new char *[_envCGI.size() + 1];
+  for (size_t i = 0; i < _envCGI.size(); i++) {
+	envCGIChar[i] = strdup(_envCGI[i].c_str());
+  }
+  envCGIChar[_envCGI.size()] = NULL;
+
+  return (envCGIChar);
 }

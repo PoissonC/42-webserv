@@ -8,6 +8,8 @@
 #include <sstream>
 #include <string>
 
+class State;
+
 struct uriComponents {
   std::string scheme;
   std::string host;
@@ -30,7 +32,7 @@ public:
   std::string getBody() const;
   uriComponents getUriComponents() const;
 
-  void setEnvCGI(const std::string cgiPath, const char ** env);
+  void setEnvCGI(State & state, const char ** env);
   char ** getEnvCGI() const;
 
 
@@ -43,7 +45,7 @@ private:
   std::string _body;
   uriComponents _uriComponents;
 
-  char ** _envCGI;
+  std::vector<std::string> _envCGI;
 
   static void _parseLineReq(std::string line, std::string &method,
                             std::string &uri, std::string &version);
