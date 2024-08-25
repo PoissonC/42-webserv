@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:12 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/25 15:10:45 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 18:47:59 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,3 +19,4 @@ void handle_read_file(State &state, Server & server);
 void handle_save_file(State &state, Server & server);
 void handle_cgi(State &state, Server & server);
 void handle_delete_file(State & state, Server & server);
+void exe_cgi(State & state, Server & server);

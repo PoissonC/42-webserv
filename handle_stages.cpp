@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/25 15:22:09 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 18:55:02 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,30 +60,45 @@ void handle_delete_file(State & state, Server & server) {
     handle_error_response(state, 500, "Server can't delete the file.", server);
     return;
   }
-  state.res.setBody("File is deleted successfully\n");
-  state.response_buff = state.res.generateResponseString();
-  poll_to_out(state.conn_fd, server);
-  state.stage = &send_response;
+  state.res.setBody("File is deleted successfully");
+  wait_to_send_resonpse(state, server);
 }
 
-void handle_cgi(State & state, Server & server) {
-  if (pipe(state.cgi_pipe) < 0) {
-    // TODO: handle error
-    handle_error_response(state, 500, "Server pipe failed, can't execute the cgi program.", server);
-    return;
-  }
-  wait_cgi(state, server);
+static void cgi_post(State & state, Server & server) {
+  // add Jeremy's part
+  state.cgi_buff = state.req.getBody();
+  wait_to_write_cgi(state, server);
+}
+
+void exe_cgi(State & state, Server & server) {
   pid_t cgi_proc = fork();
 
   if (cgi_proc < 0)
     throw std::runtime_error("Cgi fork failed");
   if (cgi_proc == 0) {
-    if (dup2(state.cgi_pipe[1], STDOUT_FILENO) < 0)
+    if (state.cgi_pipe_w[0] != 0) {
+    if (dup2(state.cgi_pipe_w[0], STDIN_FILENO) < 0)
       throw std::runtime_error("Child process dup2 failed");
-    close(state.cgi_pipe[0]);
-    close(state.cgi_pipe[1]);
+    }
+    if (dup2(state.cgi_pipe_r[1], STDOUT_FILENO) < 0)
+      throw std::runtime_error("Child process dup2 failed");
+    close(state.cgi_pipe_r[0]);
+    close(state.cgi_pipe_r[1]);
     std::vector<char*> arg;
     arg.push_back(const_cast<char*>(state.request_buff.c_str()));
     execve(state.cgi_path.c_str(), arg.data(), server.get_env());
   }
+}
+
+void handle_cgi(State & state, Server & server) {
+  if (state.req.getMethod() == POST) {
+    cgi_post(state, server);
+    return;
+  }
+  if (pipe(state.cgi_pipe_r) < 0) {
+    handle_error_response(state, 500, "Server pipe failed, can't execute the cgi program.", server);
+    return;
+  }
+  wait_to_read_cgi(state, server);
+  exe_cgi(state, server);
 }

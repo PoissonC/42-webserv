@@ -6,13 +6,13 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 12:34:34 by yu                #+#    #+#             */
-/*   Updated: 2024/08/24 17:57:22 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 16:49:08 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "LocationConfig.hpp"
 
-LocationConfig::LocationConfig() : _root("."), _cgi_pass(), _client_upload("forbidden"), _redir(std::make_pair(0, "")), _autoindex(false), _client_body_buffer_size(8 * 1024) {
+LocationConfig::LocationConfig() : _root("./"), _cgi_pass(), _client_upload("forbidden"), _redir(std::make_pair(0, "")), _autoindex(false), _client_body_buffer_size(8 * 1024) {
 	for (int i = 0; i < 3; i++)
 		_allow_methods[i] = false;
 }

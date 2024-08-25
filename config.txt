@@ -9,8 +9,8 @@ server {
     }
     location /hello {
         root ./;
-        autoindex off;
-        index index.html;
+        autoindex on;
+        cgi_pass ./cgi-bin;
         allow_methods GET POST DELETE;
     }
 }

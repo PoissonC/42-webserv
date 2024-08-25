@@ -9,7 +9,7 @@ OBJ_DIR		= obj/
 SRC 		= main.cpp ServerPrivateMemberFuncs.cpp ServerPublicMemberFuncs.cpp Server_helper.cpp Settings.cpp \
 				ServerConfig.cpp LocationConfig.cpp State.cpp \
 				parser.cpp Request.cpp Response.cpp handle_request.cpp handle_stages.cpp\
-				read_request.cpp send_response.cpp read_file.cpp read_cgi.cpp save_file.cpp\
+				read_request.cpp send_response.cpp read_file.cpp read_cgi.cpp save_file.cpp write_cgi.cpp\
 				get_mime.cpp handle_error_response.cpp
 OBJ 		= $(SRC:%.cpp=$(OBJ_DIR)%.o)
 HDR 		= Server.hpp Server_helper.hpp Settings.hpp State.hpp ServerConfig.hpp \

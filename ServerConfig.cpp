@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yu <yu@student.42.fr>                      +#+  +:+       +#+        */
+/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:21:05 by yu                #+#    #+#             */
-/*   Updated: 2024/05/30 19:05:26 by yu               ###   ########.fr       */
+/*   Updated: 2024/08/25 16:49:04 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ static void locationCheck(const LocationConfig &loc) {
 		closedir(dir);
 	}
 	if (!loc.getCgiPass().empty()) {
-		dir = opendir(("." + loc.getCgiPass()).c_str());
+		dir = opendir((loc.getRoot() + loc.getCgiPass()).c_str());
 		if (dir == NULL)
 			throw std::runtime_error("Cgi pass directory does not exist");
 		closedir(dir);

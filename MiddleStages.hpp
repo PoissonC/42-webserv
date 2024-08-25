@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:22:54 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/24 17:04:34 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 17:02:07 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,4 +23,5 @@ void send_response(std::vector<State>::iterator &state, const struct pollfd &pfd
 void read_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server);
 void save_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server);
 void read_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server);
+void write_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server);
 
