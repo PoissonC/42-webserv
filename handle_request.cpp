@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/23 18:06:50 by jhurpy            #+#    #+#             */
-/*   Updated: 2024/08/24 22:38:53 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 15:10:27 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,12 +80,6 @@ void handle_request(State & state, Server & server)
 		handle_save_file(state, server);
 	}
 	else if (state.req.getMethod() == DELETE) {
-    std::vector<char*> arg;
-    arg.push_back(const_cast<char*>(state.file_path.c_str()));
-		pid_t pid = fork();
-		if (pid < 0)
-			throw std::runtime_error("rm fork failed.");
-		if (pid == 0)
-    	execve("rm", arg.data(), server.get_env());
+		handle_delete_file(state, server);
 	}
 }

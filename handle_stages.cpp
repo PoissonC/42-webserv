@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/25 14:43:42 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 15:22:09 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,17 @@ void handle_save_file(State & state, Server & server) {
     return;
   }
   wait_to_save_file(state, server);
+}
+
+void handle_delete_file(State & state, Server & server) {
+  if (remove(state.file_path.c_str()) < 0) {
+    handle_error_response(state, 500, "Server can't delete the file.", server);
+    return;
+  }
+  state.res.setBody("File is deleted successfully\n");
+  state.response_buff = state.res.generateResponseString();
+  poll_to_out(state.conn_fd, server);
+  state.stage = &send_response;
 }
 
 void handle_cgi(State & state, Server & server) {
