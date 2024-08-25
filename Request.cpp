@@ -191,7 +191,7 @@ uriComponents Request::getUriComponents() const {
   return (this->_uriComponents);
 }
 
-void Request::setEnvCGI(const std::string cgiPath, const char ** env) {
+void Request::setEnvCGI(const std::string cgiPath, char ** env) {
 
   std::vector<std::string> envCGI;
   while (*env) {
@@ -217,6 +217,6 @@ void Request::setEnvCGI(const std::string cgiPath, const char ** env) {
   this->_envCGI = envCGIChar;
 }
 
-char ** Request::getEnvCGI() const {
+char ** Request::getEnvCGI() {
   return (this->_envCGI);
 }

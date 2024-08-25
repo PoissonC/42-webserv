@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:04:57 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/21 15:19:43 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 19:34:52 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ int main(int ac, char **av, char **env) {
 			perror(e.what());
 		else
 			std::cerr << e.what() << std::endl;
+		exit(1);
 	}
-
 	return 0;
 }

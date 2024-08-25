@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/25 18:00:23 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 21:34:42 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ State::State(int fd, unsigned char * client_addr, int socket): bytes_sent(0), re
 }
 
 void State::reset_attrs() {
+  cgi_buff = std::string();
   request_buff = std::string();
   file_buff = std::string();
   response_buff = std::string();

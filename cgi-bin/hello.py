@@ -1,2 +1,2 @@
-print("Content-type: text/html\r\n\r\n")
-print("hello world")
+print("Content-Type: text/html\r\n\r\n")
+print("hello, it's python cgi")

@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 21:32:14 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/25 18:51:41 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 21:04:18 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,5 +72,5 @@ void wait_to_send_resonpse(State &state, Server & server) {
   state.stage = &send_response;
   server.add_to_poll_out(state.conn_fd);
   state.bytes_sent = 0;
-  state.res.generateResponseString();
+  state.response_buff = state.res.generateResponseString();
 }
