@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:08:17 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/24 18:01:47 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 23:01:17 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,9 @@ char** Server::get_env() {
 
 
 void Server::remove_from_poll(int fd) {
+  std::vector<pollfd>::iterator nxt = find_it_in_nxt(fd);
+  if (nxt == _next_poll_fds.end())
+    return;
   _next_poll_fds.erase(find_it_in_nxt(fd));
 }
 

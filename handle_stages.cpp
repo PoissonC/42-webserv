@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/25 21:14:35 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 22:48:19 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,10 @@ void handle_delete_file(State & state, Server & server) {
 }
 
 static void cgi_post(State & state, Server & server) {
+  if (pipe(state.cgi_pipe_w) < 0) {
+    handle_error_response(state, 500, "Pipe failed when try to send data to CGI\n", server);
+    return;
+  }
   state.cgi_buff = state.req.getBody();
   wait_to_write_cgi(state, server);
 }
@@ -90,8 +94,12 @@ static void check_cgi_extension(State & state) {
 }
 
 void exe_cgi(State & state, Server & server) {
-  state.req.setEnvCGI(state.cgi_path, server.get_env());
+  if (pipe(state.cgi_pipe_r) < 0) {
+    handle_error_response(state, 500, "Server pipe failed, can't execute the cgi program.", server);
+    return;
+  }
 
+  state.req.setEnvCGI(state.cgi_path, server.get_env());
   pid_t cgi_proc = fork();
 
   if (cgi_proc < 0)
@@ -125,10 +133,7 @@ void handle_cgi(State & state, Server & server) {
     cgi_post(state, server);
     return;
   }
-  if (pipe(state.cgi_pipe_r) < 0) {
-    handle_error_response(state, 500, "Server pipe failed, can't execute the cgi program.", server);
-    return;
-  }
+
   exe_cgi(state, server);
   wait_to_read_cgi(state, server);
 }

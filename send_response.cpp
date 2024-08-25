@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/25 21:03:59 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 22:32:34 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,11 @@ void send_response(std::vector<State>::iterator &state, const struct pollfd &pfd
 
   ssize_t wc = send(state->conn_fd, state->response_buff.c_str() + state->bytes_sent,
                     state->response_buff.size() - state->bytes_sent, MSG_DONTWAIT);
+
+  if (wc < 0) {
+    server.close_conn(state->conn_fd, state);
+    return;
+  }
 
   if (wc == (long)state->response_buff.size() - state->bytes_sent) {
     state->stage = &read_request;
