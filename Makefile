@@ -1,8 +1,10 @@
 # Compiler and flags
-CC 			= c++
-CFLAGS 		= -std=c++98 -Wall -Wextra -Werror -fsanitize=address
+CC 			= c++ -g
+CFLAGS 		= -std=c++98 #-Wall -Wextra -Werror -fsanitize=address
 
 # Directories
+UTILS_DIR	= utils/
+PAGES_DIR	= pages/
 OBJ_DIR		= obj/
 
 # Sources and objects
@@ -11,9 +13,13 @@ SRC 		= main.cpp ServerPrivateMemberFuncs.cpp ServerPublicMemberFuncs.cpp Server
 				parser.cpp Request.cpp Response.cpp select_config.cpp handle_stages.cpp\
 				read_request.cpp send_response.cpp read_file.cpp read_cgi.cpp save_file.cpp\
 				get_mime.cpp
-OBJ 		= $(SRC:%.cpp=$(OBJ_DIR)%.o)
-HDR 		= Server.hpp Server_helper.hpp Settings.hpp State.hpp ServerConfig.hpp \
+SRC			+= $(addprefix $(UTILS_DIR), getStatusMessageFromCode.cpp HtmlMarkup.cpp)
+SRC			+= $(addprefix $(PAGES_DIR), getIndexPage.cpp getDirectoryPage.cpp)
+OBJ 		= $(addprefix $(OBJ_DIR), $(SRC:%.cpp=%.o))
+HDR 		= constants.hpp Server.hpp Server_helper.hpp Settings.hpp State.hpp ServerConfig.hpp \
 				LocationConfig.hpp parser.hpp Request.hpp Response.hpp MiddleStages.hpp
+HDR			+= $(addprefix $(UTILS_DIR), utils.hpp HtmlMarkup.hpp)
+HDR			+= $(addprefix $(PAGES_DIR), pages.hpp)
 
 NAME = webserv
 
@@ -23,7 +29,7 @@ $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
 
 $(OBJ_DIR)%.o: %.cpp $(HDR) Makefile
-	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 # Linter

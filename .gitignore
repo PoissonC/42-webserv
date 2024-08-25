@@ -11,6 +11,8 @@
 *.lo
 *.o
 *.obj
+/obj
+webserv
 
 # Precompiled Headers
 *.gch
