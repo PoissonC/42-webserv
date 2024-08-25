@@ -1,5 +1,6 @@
 #ifndef RESPONSE_HPP
 #define RESPONSE_HPP
+#include "utils/utils.hpp"
 #include <map>
 #include <sstream>
 #include <string>
@@ -16,7 +17,7 @@ public:
   ~Response();
 
   // @defgroup setters
-  void setStatusCode(int code);
+  void setStatus(int code);
   void setStatusMessage(const std::string &message);
   void setHeader(const std::string &key, const std::string &value);
   void setBody(const std::string &responseBody);

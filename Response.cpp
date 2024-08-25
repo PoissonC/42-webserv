@@ -10,7 +10,10 @@ Response::Response()
 Response::~Response(){};
 
 // @defgroup setters
-void Response::setStatusCode(int code) { _statusCode = code; }
+void Response::setStatus(int code) {
+  _statusCode = code;
+  _statusMessage = getStatusMessageFromCode(code);
+}
 
 void Response::setStatusMessage(const std::string &message) {
   _statusMessage = message;
