@@ -6,41 +6,64 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/26 14:53:23 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 15:09:03 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "handle_stages.hpp"
 #include "handle_error_response.hpp"
 #include "helper.hpp"
+#include "pages/pages.hpp"
 
-static void check_index(State & state) {
-  std::vector<std::string> indices = state.loc.getIndex();
-  for (std::vector<std::string>::iterator it = indices.begin(); it != indices.end(); it++) {
-    std::string tar = state.file_path + "/" + *it;
-    state.file_fd = open(tar.c_str(), O_RDONLY);
-    state.res.setHeader("Content-Type", getMimeType(tar));
-    if (state.file_fd > 0)
-      return;
-  }
-  std::cout << "No file found." << std::endl;
-}
+void handle_read_file(State &state, Server &server) {
+  struct stat path_stat;
+  stat(state.file_path.c_str(), &path_stat);
 
-void handle_read_file(State & state, Server & server) {
-  if (state.file_path.size() <= 2) {
-    
-    check_index(state);
-  }
-  else {
+  if (S_ISDIR(path_stat.st_mode)) {
+    const std::vector<std::string> &indexFiles = state.loc.getIndex();
+    bool isIndexFileFound = false;
+
+    for (std::vector<std::string>::const_iterator it = indexFiles.begin();
+         it != indexFiles.end(); ++it) {
+      std::string potentialIndexPath = state.file_path + "/" + *it;
+      if (access(potentialIndexPath.c_str(), F_OK) != -1) {
+        state.file_path = potentialIndexPath;
+        state.file_fd = open(state.file_path.c_str(), O_RDONLY);
+        state.res.setHeader("Content-Type", getMimeType(state.file_path));
+        isIndexFileFound = true;
+        break;
+      }
+    }
+
+    if (!isIndexFileFound) {
+      state.res.setHeader("Content-Type", "text/html");
+      if (state.loc.getAutoindex()) {
+        state.res.setBody(getDirectoryPage(state));
+        state.response_buff = state.res.generateResponseString();
+        state.stage = &send_response;
+        poll_to_out(state.conn_fd, server);
+        return;
+      } else {
+        state.res.setBody(getIndexPage(state));
+        state.response_buff = state.res.generateResponseString();
+        state.stage = &send_response;
+        poll_to_out(state.conn_fd, server);
+        return;
+      }
+    }
+  } else {
     state.file_fd = open(state.file_path.c_str(), O_RDONLY);
     state.res.setHeader("Content-Type", getMimeType(state.file_path));
   }
+
   if (state.file_fd < 0) {
-    // TODO: handle error
-    handle_error_response(state, 404, "File not found or can't be opened", server);
+    // TODO handle error
     std::cout << "Failed to open file." << std::endl;
+    state.stage = &send_response;
+    poll_to_out(state.conn_fd, server);
     return;
   }
+
   wait_to_read_file(state, server);
 }
 
@@ -115,7 +138,6 @@ void exe_cgi(State & state, Server & server) {
     close(state.cgi_pipe_r[0]);
     close(state.cgi_pipe_r[1]);
     std::vector<char*> file_path;
-    // The following function modify state.cgi_path to the path to cgi program
     check_cgi_extension(state);
     file_path.push_back(const_cast<char*>(state.original_path.c_str()));
     file_path.push_back(const_cast<char*>(state.cgi_path.c_str()));

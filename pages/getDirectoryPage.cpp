@@ -64,7 +64,7 @@ std::string formatTime(time_t rawTime) {
   return std::string(buffer);
 }
 
-std::string getAddButtonMarkup(HtmlMarkup &directoryPage, State &state) {
+std::string getAddButtonMarkup(HtmlMarkup &directoryPage) {
   const std::string addIcon = "&#8853;";
   std::string button;
 
@@ -203,7 +203,7 @@ std::string getDirectoryPage(State &state) {
   // Add title line
   mainContent << "<div>";
   mainContent << "<p>" << state.file_path << "/</p>";
-  mainContent << getAddButtonMarkup(directoryPage, state);
+  mainContent << getAddButtonMarkup(directoryPage);
   mainContent << "</div>";
 
   mainContent << "<ul>";

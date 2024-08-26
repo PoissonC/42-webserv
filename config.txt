@@ -13,9 +13,5 @@ server {
         allow_methods GET POST DELETE;
     }
 
-    location /otherFiles {
-            autoindex on;
-            root ./otherFiles;
-            allow_methods GET;
-        }
+
 }
