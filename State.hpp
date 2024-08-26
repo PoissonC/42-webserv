@@ -6,12 +6,13 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/26 14:51:35 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 15:12:27 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "LocationConfig.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "MiddleStages.hpp"

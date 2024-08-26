@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/26 15:09:03 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 15:11:44 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,7 @@ void exe_cgi(State & state, Server & server) {
     return;
   }
 
-  state.req.setEnvCGI(state.cgi_path, server.get_env());
+  state.req.setEnvCGI(state, server.get_env());
   pid_t cgi_proc = fork();
 
   if (cgi_proc < 0)
