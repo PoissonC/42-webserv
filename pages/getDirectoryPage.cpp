@@ -170,8 +170,8 @@ std::string getParentPath(const std::string &path) {
   std::string parentPath = path;
 
   // Remove the trailing slash if it's there and it's not the root
-  if (parentPath.back() == '/' && parentPath.length() > 1) {
-    parentPath.pop_back();
+  if (*parentPath.rbegin() == '/' && parentPath.length() > 1) {
+    parentPath.resize(parentPath.size() - 1);
   }
 
   // Find the last '/' in the path

@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:29 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/26 14:36:15 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 14:39:34 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@ class Server;
 
 #include "MiddleStages.hpp"
 #include "Server_helper.hpp"
+#include "handle_stages.hpp"
 
 void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd,
                   Server &server) {
@@ -60,15 +61,6 @@ void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd,
 
 
     server.getServerConfig(*state);
-
-
-
-    // if we need to return a file:
-    handle_read_file(state, pfd, server);
-    // if we need to save a uploaded file:
-    handle_save_file(state, pfd, server);
-    // if we need to call cgi
-    handle_cgi(state, pfd, server);
 
   }
 }
