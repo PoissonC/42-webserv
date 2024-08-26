@@ -6,11 +6,12 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:08:17 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/26 14:58:06 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 16:40:00 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include <signal.h>
 
 std::vector<struct pollfd>::iterator Server::getNextPfdsEnd() {
   return _next_poll_fds.end();
@@ -92,7 +93,7 @@ Server::Server(std::vector<Settings> &settings, char **env) :  _env(env), _setti
   if (_constructed)
     throw std::runtime_error("The server instance already exists");
   _constructed = true;
-
+  signal(SIGCHLD, SIG_IGN);
   // set socket for all servers, bind and listen.
   for (std::vector<Settings>::iterator it = _settings.begin();
        it != _settings.end(); it++)

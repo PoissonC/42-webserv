@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/26 15:12:27 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 15:40:54 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,11 @@
 #include "Response.hpp"
 #include "MiddleStages.hpp"
 #include "ServerConfig.hpp"
+#include <stdint.h>
 
 class State {
 public:
-  State(int fd, unsigned char * client_addr, int socket);
+  State(int fd, uint32_t client_addr, int socket);
 
   void reset_attrs();
   void setup_cgi();
@@ -39,7 +40,7 @@ public:
   Request req;
   Response res;
 
-  unsigned char *client_ip;
+  std::string client_ip_str;
 
   int cgi_pipe_r[2], cgi_pipe_w[2];
   int sock_fd, conn_fd, file_fd;

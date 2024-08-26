@@ -217,8 +217,7 @@ void Request::setEnvCGI(State & state, char ** env) {
 	_envCGI.push_back("PATH_INFO=" + state.cgi_path);
 	_envCGI.push_back("SCRIPT_FILENAME=" + state.cgi_path);
 	_envCGI.push_back("DOCUMENT_ROOT=" + state.cgi_path);
-	std::string client_ip_str = std::to_string(state.client_ip[0]) + "." + std::to_string(state.client_ip[1]) + "." + std::to_string(state.client_ip[2]) + "." + std::to_string(state.client_ip[3]);
-	_envCGI.push_back("REMOTE_ADDR=" + client_ip_str);
+	_envCGI.push_back("REMOTE_ADDR=" + state.client_ip_str);
 }
 
 char ** Request::getEnvCGI() const {

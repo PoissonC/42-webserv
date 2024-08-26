@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/25 23:04:48 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 15:54:25 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ void write_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd, Se
   if (!(pfd.revents & POLLOUT))
     return;
   if (state->cgi_pipe_w[1] != pfd.fd) {
+    std::cout << "Conn fd: " << state->conn_fd << ", pipew: " << state->cgi_pipe_w[1] << ", pfd: " << pfd.fd << std::endl;
     throw std::runtime_error("Control Flow is Wrong\n");
     return;
   }

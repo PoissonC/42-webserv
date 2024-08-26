@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/25 23:04:10 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 16:44:06 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "helper.hpp"
 
 static bool cgi_parser(State & state) {
+  std::cout << "CGI output\n" << state.cgi_buff << std::endl;
   size_t  headerEndPos = state.cgi_buff.find_first_of("\r\n\r\n");
   if (headerEndPos == std::string::npos) {
     state.res.setBody(state.cgi_buff);
@@ -43,7 +44,7 @@ void read_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd, Ser
 
   ssize_t rc = read(state->cgi_pipe_r[0], buf, BUFFER_SIZE);
   
-  if (rc < 0) {
+  if (rc <= 0) {
     // TODO: handle error
     close(state->cgi_pipe_r[0]);
     server.remove_from_poll(state->cgi_pipe_r[0]);
