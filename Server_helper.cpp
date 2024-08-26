@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server_helper.cpp                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/24 21:32:14 by ychen2            #+#    #+#             */
+/*   Updated: 2024/08/26 16:46:26 by ychen2           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Server_helper.hpp"
 
 
@@ -31,21 +43,34 @@ void poll_to_in(int fd, Server & server) {
   next_pfd->events = POLLIN | POLLHUP | POLLERR;
 }
 
-void wait_to_save_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
-  state->stage = &save_file;
-  server.remove_from_poll(state->conn_fd);
-  server.add_to_poll_out(state->file_fd);
+void wait_to_save_file(State &state, Server & server) {
+  state.stage = &save_file;
+  server.remove_from_poll(state.conn_fd);
+  poll_to_out(state.file_fd, server);
 }
 
-void wait_to_read_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
-  state->stage = &read_file;
-  server.remove_from_poll(state->conn_fd);
-  server.add_to_poll_in(state->file_fd);
+void wait_to_read_file(State &state, Server & server) {
+  state.stage = &read_file;
+  server.remove_from_poll(state.conn_fd);
+  poll_to_in(state.file_fd, server);
 }
 
-void wait_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
-  state->stage = &read_cgi;
-  server.remove_from_poll(state->conn_fd);
-  server.add_to_poll_in(state->cgi_pipe[0]);
+void wait_to_read_cgi(State &state, Server & server) {
+  state.stage = &read_cgi;
+  server.remove_from_poll(state.conn_fd);
+  poll_to_in(state.cgi_pipe_r[0], server);
 }
 
+void wait_to_write_cgi(State &state, Server & server) {
+  state.bytes_sent = 0;
+  state.stage = &write_cgi;
+  server.remove_from_poll(state.conn_fd);
+  poll_to_out(state.cgi_pipe_w[1], server);
+}
+
+void wait_to_send_resonpse(State &state, Server & server) {
+  state.stage = &send_response;
+  poll_to_out(state.conn_fd, server);
+  state.bytes_sent = 0;
+  state.response_buff = state.res.generateResponseString();
+}

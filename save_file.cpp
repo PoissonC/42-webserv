@@ -6,11 +6,12 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/21 20:07:12 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 18:21:14 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "MiddleStages.hpp"
+#include "handle_error_response.hpp"
 
 void save_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
   if (!(pfd.revents & POLLOUT))
@@ -23,18 +24,15 @@ void save_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Se
     close(pfd.fd);
     server.remove_from_poll(pfd.fd);
     // TODO: handle error
-    state->stage = &send_response;
-    server.add_to_poll_out(state->conn_fd);
-    state->bytes_sent = 0;
+    handle_error_response(*state, 500, "Write content to opened file failed.", server);
     return;
   }
   if (wc == (long)state->req.getBody().size() - state->bytes_sent) {
     close(pfd.fd);
     server.remove_from_poll(pfd.fd);
     // TODO: generates the response to indicate succsess
-    state->stage = &send_response;
-    server.add_to_poll_out(state->conn_fd);
-    state->bytes_sent = 0;
+    state->res.setBody("File uploaded successfully.\n");
+    wait_to_send_resonpse(*state, server);
     return;
   }
   state->bytes_sent += wc;

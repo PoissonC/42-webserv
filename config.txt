@@ -4,7 +4,19 @@ server {
 
     location / {
         autoindex off;
-        index index.html;
         allow_methods GET;
     }
+
+    location /files {
+        autoindex on;
+        root ./files;
+        allow_methods GET POST DELETE;
+    }
+
+    location /cgi {
+        autoindex on;
+        cgi_pass ./cgi-bin;
+        allow_methods GET POST DELETE;
+    }
+
 }

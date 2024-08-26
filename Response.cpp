@@ -4,16 +4,69 @@
 Response::Response()
     : _statusCode(200), _statusMessage("OK"), _body("Hello, World!") {
   _headers["Content-Type"] = "text/html";
+
+  _statusMessages[100] = "Continue";
+  _statusMessages[101] = "Switching Protocols";
+  _statusMessages[200] = "OK";
+  _statusMessages[201] = "Created";
+  _statusMessages[202] = "Accepted";
+  _statusMessages[204] = "No Content";
+  _statusMessages[205] = "Reset Content";
+  _statusMessages[206] = "Partial Content";
+  _statusMessages[300] = "Multiple Choices";
+  _statusMessages[301] = "Moved Permanently";
+  _statusMessages[302] = "Found";
+  _statusMessages[303] = "See Other";
+  _statusMessages[304] = "Not Modified";
+  _statusMessages[307] = "Temporary Redirect";
+  _statusMessages[308] = "Permanent Redirect";
+  _statusMessages[400] = "Bad Request";
+  _statusMessages[401] = "Unauthorized";
+  _statusMessages[403] = "Forbidden";
+  _statusMessages[404] = "Not Found";
+  _statusMessages[405] = "Method Not Allowed";
+  _statusMessages[406] = "Not Acceptable";
+  _statusMessages[408] = "Request Timeout";
+  _statusMessages[409] = "Conflict";
+  _statusMessages[410] = "Gone";
+  _statusMessages[411] = "Length Required";
+  _statusMessages[413] = "Payload Too Large";
+  _statusMessages[414] = "URI Too Long";
+  _statusMessages[415] = "Unsupported Media Type";
+  _statusMessages[416] = "Range Not Satisfiable";
+  _statusMessages[417] = "Expectation Failed";
+  _statusMessages[426] = "Upgrade Required";
+  _statusMessages[500] = "Internal Server Error";
+  _statusMessages[501] = "Not Implemented";
+  _statusMessages[502] = "Bad Gateway";
+  _statusMessages[503] = "Service Unavailable";
+  _statusMessages[504] = "Gateway Timeout";
+  _statusMessages[505] = "HTTP Version Not Supported";
+
+ //link for status code: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#information_responses
+
 };
 
 // @def destructor
 Response::~Response(){};
 
 // @defgroup setters
-void Response::setStatusCode(int code) { _statusCode = code; }
+void Response::setStatusCode(int code) {
+  _statusMessage = _statusMessages[code];
+  if (_statusMessage.size() == 0)
+    _statusMessage = "Undefined";
+  _statusCode = code; 
+  }
 
-void Response::setStatusMessage(const std::string &message) {
-  _statusMessage = message;
+void Response::setStatusMessage(const int code) {
+  std::map<int, std::string>::const_iterator it = _statusMessages.find(code);
+  if (it != _statusMessages.end()) {
+	_statusMessage = it->second;
+  }
+  else {
+	setStatusCode(500);
+	_statusMessage = "Internal Server Error";
+  }
 }
 
 void Response::setHeader(const std::string &key, const std::string &value) {
