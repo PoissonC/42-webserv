@@ -3,6 +3,7 @@
 
 #include "LocationConfig.hpp"
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -30,6 +31,10 @@ public:
   std::string getBody() const;
   uriComponents getUriComponents() const;
 
+  void setEnvCGI(const std::string cgiPath, char ** env);
+  char ** getEnvCGI();
+
+
 private:
   std::string _req;
   std::string _method;
@@ -38,6 +43,8 @@ private:
   std::map<std::string, std::string> _headers;
   std::string _body;
   uriComponents _uriComponents;
+
+  char ** _envCGI;
 
   static void _parseLineReq(std::string line, std::string &method,
                             std::string &uri, std::string &version);

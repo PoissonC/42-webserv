@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:29 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/26 14:39:34 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 14:52:30 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,9 @@ class Server;
 
 #include "MiddleStages.hpp"
 #include "Server_helper.hpp"
-#include "handle_stages.hpp"
+#include "handle_error_response.hpp"
 
-void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd,
-                  Server &server) {
+void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
   if (!(pfd.revents & POLLIN))
     return;
 
@@ -35,32 +34,12 @@ void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd,
   state->request_buff += buf;
 
   if (rc < BUFFER_SIZE) {
-    // finish reading, it needs to do something and checks conditions. Below
-    // just for tests:
     state->req = Request(state->request_buff);
-    state->res.setStatus(state->req.checkRequest());
-    if (state->res.getStatusCode() != 200) {
-      // TODO: handle error
-      state->stage = &send_response;
-      poll_to_out(state->conn_fd, server);
+    int status_code = state->req.checkRequest();
+    if (status_code != 200) {
+      handle_error_response(*state, status_code, "Bad request.", server);
       return;
     }
-    select_loc_config(*state, server);
-
-    // state->stage = &send_response;
-    // poll_to_out(state->conn_fd, server);
-    // return;
-    // above needs to be removed
-
-    /*
-      TODO: check the config file and decide which case to handle
-      Jeremy's job
-    */
-    // Function will compare the request with the server config
-    //func(serverConfig);
-
-
-    server.getServerConfig(*state);
-
+	  handle_request(*state, server);
   }
 }

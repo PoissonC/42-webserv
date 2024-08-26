@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server_helper.cpp                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/24 21:32:14 by ychen2            #+#    #+#             */
+/*   Updated: 2024/08/26 14:56:09 by ychen2           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Server_helper.hpp"
 
 
@@ -43,9 +55,22 @@ void wait_to_read_file(State &state, Server & server) {
   server.add_to_poll_in(state.file_fd);
 }
 
-void wait_cgi(State &state, Server & server) {
+void wait_to_read_cgi(State &state, Server & server) {
   state.stage = &read_cgi;
   server.remove_from_poll(state.conn_fd);
-  server.add_to_poll_in(state.cgi_pipe[0]);
+  server.add_to_poll_in(state.cgi_pipe_r[0]);
 }
 
+void wait_to_write_cgi(State &state, Server & server) {
+  state.bytes_sent = 0;
+  state.stage = &write_cgi;
+  server.remove_from_poll(state.conn_fd);
+  server.add_to_poll_out(state.cgi_pipe_w[1]);
+}
+
+void wait_to_send_resonpse(State &state, Server & server) {
+  state.stage = &send_response;
+  server.add_to_poll_out(state.conn_fd);
+  state.bytes_sent = 0;
+  state.response_buff = state.res.generateResponseString();
+}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yu <yu@student.42.fr>                      +#+  +:+       +#+        */
+/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:21:05 by yu                #+#    #+#             */
-/*   Updated: 2024/05/30 19:05:26 by yu               ###   ########.fr       */
+/*   Updated: 2024/08/26 14:56:39 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,31 +87,28 @@ bool ServerConfig::hasRootLocation() const {
 }
 
 static void locationCheck(const LocationConfig &loc) {
-  if (!loc.getIndex().empty() && !loc.getCgiPass().empty())
-    throw std::runtime_error("Location: Cannot have both index and cgi_pass");
-  std::string rootPath = loc.getRoot();
-  if (rootPath[0] != '/' && rootPath[0] != '.')
-    rootPath = "." + rootPath;
-
-  DIR *dir = opendir(rootPath.c_str());
-  if (dir == NULL)
-    throw std::runtime_error("Location: Root directory does not exist");
-  closedir(dir);
-  if (loc.getClientUpload() != "forbidden") {
-    if (rootPath != "./")
-      dir = opendir((rootPath + loc.getClientUpload()).c_str());
-    else
-      dir = opendir(loc.getClientUpload().c_str());
-    if (dir == NULL)
-      throw std::runtime_error("Client upload directory does not exist");
-    closedir(dir);
-  }
-  if (!loc.getCgiPass().empty()) {
-    dir = opendir(("." + loc.getCgiPass()).c_str());
-    if (dir == NULL)
-      throw std::runtime_error("Cgi pass directory does not exist");
-    closedir(dir);
-  }
+	if (!loc.getIndex().empty() && !loc.getCgiPass().empty())
+		throw std::runtime_error("Location: Cannot have both index and cgi_pass");
+	std::string path = "." + loc.getRoot();
+	DIR *dir = opendir(path.c_str());
+	if (dir == NULL)
+		throw std::runtime_error("Location: Root directory does not exist");
+	closedir(dir);
+	if (loc.getClientUpload() != "forbidden") {
+		if (path != "./")
+			dir = opendir((path + loc.getClientUpload()).c_str());
+		else
+			dir = opendir(loc.getClientUpload().c_str());
+		if (dir == NULL)
+			throw std::runtime_error("Client upload directory does not exist");
+		closedir(dir);
+	}
+	if (!loc.getCgiPass().empty()) {
+		dir = opendir((loc.getRoot() + loc.getCgiPass()).c_str());
+		if (dir == NULL)
+			throw std::runtime_error("Cgi pass directory does not exist");
+		closedir(dir);
+	}
 }
 static void serverCheck(const ServerConfig &server) {
   std::map<std::string, LocationConfig> loc = server.getLocations();

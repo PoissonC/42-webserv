@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:05:27 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/21 19:14:43 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/25 17:55:41 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ bool Server::is_socket(int fd) {
 std::vector<State>::iterator Server::getState(int fd) {
   for (std::vector<State>::iterator it = _states.begin(); it != _states.end();
        it++) {
-    if (it->conn_fd == fd || it->file_fd == fd || it->cgi_pipe[1] == fd)
+    if (it->conn_fd == fd || it->file_fd == fd || it->cgi_pipe_w[1] == fd || it->cgi_pipe_r[0] == fd)
       return it;
   }
   return _states.end();

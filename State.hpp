@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/24 18:03:12 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 14:51:35 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,12 @@ class State {
 public:
   State(int fd, unsigned char * client_addr, int socket);
 
+  void reset_attrs();
+  void setup_cgi();
+
   std::string request_buff;
   std::string file_buff;
+  std::string cgi_buff;
 
   std::string response_buff;
   long bytes_sent;
@@ -36,7 +40,7 @@ public:
 
   unsigned char *client_ip;
 
-  int cgi_pipe[2];
+  int cgi_pipe_r[2], cgi_pipe_w[2];
   int sock_fd, conn_fd, file_fd;
   void (*stage)(std::vector<State>::iterator &, const struct pollfd &, Server &);
 
