@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/26 16:44:06 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 18:56:10 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ static bool cgi_parser(State & state) {
     state.response_buff = state.res.generateResponseString();
     return true;
   }
+  std::cout << "CGI headers:\n" << state.cgi_buff.substr(0, headerEndPos) << std::endl;
   std::vector<std::string> headers = split(state.cgi_buff.substr(0, headerEndPos), ':');
   if (headers.size() % 2 != 0)
     return false;
@@ -30,6 +31,7 @@ static bool cgi_parser(State & state) {
     std::vector<std::string>::iterator key = it++;
     state.res.setHeader(*key, (*it).substr(1));
   }
+  std::cout << "CGI body\n" << state.cgi_buff.substr(headerEndPos + 4) << std::endl;
   state.res.setBody(state.cgi_buff.substr(headerEndPos + 4));
   state.response_buff = state.res.generateResponseString();
   return true;
@@ -42,7 +44,7 @@ void read_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd, Ser
   char buf[BUFFER_SIZE];
   bzero(buf, sizeof(buf));
 
-  ssize_t rc = read(state->cgi_pipe_r[0], buf, BUFFER_SIZE);
+  ssize_t rc = read(state->cgi_pipe_r[0], buf, BUFFER_SIZE - 1);
   
   if (rc <= 0) {
     // TODO: handle error
@@ -55,7 +57,7 @@ void read_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd, Ser
   state->cgi_buff += buf;
 
   // end of reading
-  if (rc < BUFFER_SIZE) {
+  if (rc < BUFFER_SIZE - 1) {
     close(state->cgi_pipe_r[0]);
     server.remove_from_poll(state->cgi_pipe_r[0]);
     if (!cgi_parser(*state)) {

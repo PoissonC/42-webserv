@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 22:00:02 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/24 18:01:58 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 18:54:27 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@
 #include <fcntl.h>
 #endif
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 10
 #define BACK_LOG 32
 #define MAX_EVENTS 16
 
