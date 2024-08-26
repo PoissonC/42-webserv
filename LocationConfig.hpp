@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 10:44:50 by yu                #+#    #+#             */
-/*   Updated: 2024/08/24 17:08:56 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 17:13:54 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@ public:
 	void setAutoindex(const std::vector< std::string > &tokens, size_t &pos);
 	void setRoot(const std::vector< std::string > &tokens, size_t &pos);
 	void setCgiPass(const std::vector< std::string > &tokens, size_t &pos);
-	void setClientUpload(const std::vector< std::string > &tokens, size_t &pos);
 	void setRedir(const std::vector< std::string > &tokens, size_t &pos);
 	void setClientBodyBufferSize(const std::vector< std::string > &tokens, size_t &pos);
 
@@ -46,7 +45,6 @@ public:
 	std::string getPath() const;
 	std::string getRoot() const;
 	std::string getCgiPass() const;
-	std::string getClientUpload() const;
 	std::pair< int, std::string > getRedir() const;// if first is 0, no redir
 	bool getAllowMethods(e_methods method) const;
 	bool getAutoindex() const;
@@ -56,7 +54,6 @@ private:
 	std::vector< std::string > _index;
 	std::string _root;
 	std::string _cgi_pass;
-	std::string _client_upload;
 	std::pair< int, std::string > _redir;
 	bool _allow_methods[3];
 	bool _autoindex;

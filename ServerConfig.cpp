@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:21:05 by yu                #+#    #+#             */
-/*   Updated: 2024/08/26 15:05:59 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 17:14:18 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,15 +94,6 @@ static void locationCheck(const LocationConfig &loc) {
 	if (dir == NULL)
 		throw std::runtime_error("Location: Root directory does not exist");
 	closedir(dir);
-	if (loc.getClientUpload() != "forbidden") {
-		if (path != "./")
-			dir = opendir((path + loc.getClientUpload()).c_str());
-		else
-			dir = opendir(loc.getClientUpload().c_str());
-		if (dir == NULL)
-			throw std::runtime_error("Client upload directory does not exist");
-		closedir(dir);
-	}
 	if (!loc.getCgiPass().empty()) {
 		dir = opendir((loc.getRoot() + loc.getCgiPass()).c_str());
 		if (dir == NULL)
