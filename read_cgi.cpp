@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/27 15:43:49 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/27 23:31:45 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,14 +43,13 @@ void read_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd, Ser
 
   ssize_t rc = read(state->cgi_pipe_r[0], buf, BUFFER_SIZE - 1);
   
-  if (rc <= 0) {
+  if (rc < 0) {
     // TODO: handle error
     close(state->cgi_pipe_r[0]);
     server.remove_from_poll(state->cgi_pipe_r[0]);
     handle_error_response(*state, 500, "Read CGI output failed.", server);
     return;
   }
-
   state->cgi_buff += buf;
 
   // end of reading

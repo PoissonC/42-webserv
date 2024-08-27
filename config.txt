@@ -20,33 +20,3 @@ server {
     }
 
 }
-
-server {
-    listen 127.0.0.1:8080;
-    server_name tester.com;
-
-    location / {
-        root ./YoupiBanane;
-		autoindex on;
-        allow_methods GET;
-    }
-
-	location /put_test {
-        root ./;
-        allow_methods ;
-    }
-
-
-	location /post_body {
-		root ./storage;
-		allow_methods POST;
-		client_max_body_size 100;
-	}
-
-	location /directory {
-        allow_methods GET;
-		root YoupiBanane;
-		index youpi.bad_extension;
-	}
-}
-

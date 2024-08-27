@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/23 18:06:50 by jhurpy            #+#    #+#             */
-/*   Updated: 2024/08/25 17:38:10 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/27 19:01:12 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,14 @@ void handle_request(State & state, Server & server)
 	if (state.loc.getCgiPass().size() > 0) {
 		state.cgi_path = state.loc.getRoot() + state.loc.getCgiPass() + state.original_path;
 								std::cout << "Full CGI path: " << state.cgi_path << std::endl;
+
+		struct stat path_stat;
+		stat(state.cgi_path.c_str(), &path_stat);
+		if (S_ISDIR(path_stat.st_mode)) {
+			state.file_path = state.cgi_path;
+			handle_read_file(state, server);
+			return;
+		}
 		handle_cgi(state, server);
 		return;
 	}

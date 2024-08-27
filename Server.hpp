@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 22:00:02 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/26 18:54:27 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/27 23:39:36 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,10 @@
 #include <fcntl.h>
 #endif
 
-#define BUFFER_SIZE 10
+#define BUFFER_SIZE 2
 #define BACK_LOG 32
 #define MAX_EVENTS 16
+#define CGI_TIMEOUT 1
 
 class Server {
 
@@ -73,4 +74,6 @@ private:
 
   void run_a_server(
       std::vector<Settings>::iterator &); // socket, setsockopt, bind, listen
+
+  void checkTimeouotCGI();
 };

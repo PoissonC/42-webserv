@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:08:17 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/26 16:40:00 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/27 23:59:50 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,12 @@ Server::Server(std::vector<Settings> &settings, char **env) :  _env(env), _setti
 void Server::run() {
   while (1) {
     _cur_poll_fds = _next_poll_fds;
+      // std::cout << "FDs in poll:" << std::endl;
+    // for (unsigned long i = 0; i < _cur_poll_fds.size(); i++) {
+    //   std::cout << _cur_poll_fds[i].fd << ", ";
+    // }
+    //   std::cout << std::endl;
+    checkTimeouotCGI();
     int nfds = poll(_cur_poll_fds.data(), _cur_poll_fds.size(), -1);
     if (nfds == -1)
       throw std::runtime_error("poll failed");
@@ -125,6 +131,7 @@ void Server::run() {
 
         // Close connection if any error occurs (http/1.1 keeps the connection)
         if (it->revents & (POLLHUP | POLLERR)) {
+          std::cout << "Close conn from Server::run()" << std::endl;
           close_conn(it->fd, cur_state);
           continue;
         }

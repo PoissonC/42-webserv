@@ -3,6 +3,8 @@
 // Tell the browser this is a plain text response
 header("Content-Type: text/plain");
 
+
+
 // Output the request method
 echo "Request Method: " . $_SERVER['REQUEST_METHOD'] . "\n";
 
@@ -13,7 +15,9 @@ if (isset($_SERVER['QUERY_STRING'])) {
 
 // Output POST data (if any)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    echo "POST Data:\n";
+    $input = file_get_contents('php://input');
+    echo "POST Data: " . $input;
+    echo "\n";
     foreach ($_POST as $key => $value) {
         echo "$key: $value\n";
     }

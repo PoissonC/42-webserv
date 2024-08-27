@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/26 15:40:54 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/27 22:27:26 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include "MiddleStages.hpp"
 #include "ServerConfig.hpp"
 #include <stdint.h>
+#include <ctime>
 
 class State {
 public:
@@ -26,6 +27,8 @@ public:
   void reset_attrs();
   void setup_cgi();
 
+  size_t      bodyPos;
+  size_t      contentLength;
   std::string request_buff;
   std::string file_buff;
   std::string cgi_buff;
@@ -49,4 +52,7 @@ public:
 
   ServerConfig  server;
   LocationConfig  loc;
+
+  std::time_t timeCGI;
+  bool        isCGIrunning;
 };
