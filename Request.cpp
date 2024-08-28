@@ -45,7 +45,10 @@ void Request::parse() {
       }
       _parseHeaders(line, this->_headers);
     } else {
-      bodyStream << line << std::endl;
+      if (!iss.eof())
+        bodyStream << line << std::endl;
+      else
+        bodyStream << line;
     }
   }
   this->_body = bodyStream.str();
@@ -139,13 +142,12 @@ int Request::checkRequest() {
     return (400);
   std::map<std::string, std::string>::iterator CL = _headers.find("Content-Length");
   if (CL != this->_headers.end()) {
-    long contentLen = std::strtol(CL->second.c_str(), NULL, 10);
+    std::strtol(CL->second.c_str(), NULL, 10);
     if (errno == ERANGE) {
       return (400);
     }
-    if (contentLen != (long)_body.size())
-      return (400);
-  }
+  } else if (_method == "POST")
+    return (400);
   std::string hostUri = this->_uriComponents.host;
   std::string hostHeader = this->_headers["Host"];
   if (!hostUri.empty()) {

@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:29 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/28 16:27:57 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 20:55:39 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,26 @@ class Server;
 #include "MiddleStages.hpp"
 #include "Server_helper.hpp"
 #include "handle_error_response.hpp"
+
+static void finishReadingHeaders(std::vector<State>::iterator &state, Server & server) {
+  std::cout << "Finished reading headers." << std::endl;
+  state->req = Request(state->request_buff);
+  std::map<std::string, std::string> headers = state->req.getHeaders();
+  std::map<std::string, std::string>::iterator CL = headers.find("Content-Length");
+  if (CL == headers.end()) {
+    if (state->req.getMethod() == POST || state->req.getMethod() == DELETE) {
+      handle_error_response(*state, 400, "Bad request.\nThe POST/DELETE request doesn't contain Content-Length in header", server);
+      return;
+    } else if (state->req.getMethod() == GET)
+        state->contentLength = 0;
+  } else {
+    state->contentLength = std::strtol(CL->second.c_str(), NULL, 10);
+    if (errno == ERANGE) {
+      handle_error_response(*state, 400, "Bad request.\nThe Content-Length is invalid.", server);
+      return;
+    }
+  }
+}
 
 void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
   if (!(pfd.revents & POLLIN))
@@ -34,27 +54,11 @@ void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd,
   state->request_buff += buf;
 
   state->bodyPos = state->request_buff.find("\r\n\r\n");
-  if (state->bodyPos != std::string::npos) {
+  if (state->bodyPos != std::string::npos && !state->isFinishHeaders) {
+    finishReadingHeaders(state, server);
+    state->isFinishHeaders = true;
+  } else if (state->isFinishHeaders) {
     state->req = Request(state->request_buff);
-    std::map<std::string, std::string> headers = state->req.getHeaders();
-    std::map<std::string, std::string>::iterator CL = headers.find("Content-Length");
-    if (state->req.getMethod() == ERROR) {
-      handle_error_response(*state, 403, "Method not allowed.", server);
-      return;
-    } else if (state->req.getMethod() == GET) {
-      state->contentLength = 0;
-    } else if (CL == headers.end()) {
-      handle_error_response(*state, 400, "Bad request.\nThe POST/DELETE request doesn't contain Content-Length in header", server);
-      return;
-    }
-    if (state->req.getMethod() != GET) {
-      state->contentLength = std::strtol(CL->second.c_str(), NULL, 10);
-      if (errno == ERANGE) {
-        handle_error_response(*state, 400, "Bad request.\nThe Content-Length is invalid.", server);
-        return;
-      }
-    }
-    
   }
 
   if (rc < BUFFER_SIZE - 1 || state->contentLength == state->req.getBody().size()) {
