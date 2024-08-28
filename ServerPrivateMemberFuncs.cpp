@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:05:27 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/28 16:22:36 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 17:39:06 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,13 @@ void Server::run_a_server(std::vector<Settings>::iterator &it) {
 
   // Setting up sockets for poll
   add_to_poll_in(new_socket_fd);
+  // std::cout << "Start server for:\n" ;
+  // for (std::vector<ServerConfig>::iterator sit = it->_servers.begin(); sit != it->_servers.end(); sit++) {
+  //   std::vector<std::string> servernames = sit->getServerNames();
+  //   for (std::vector<std::string>::iterator snit = servernames.begin(); snit != servernames.end(); snit++ )
+  //     std::cout << *snit;
+  //   std::cout << std::endl;
+  // }
 }
 
 void Server::new_conns(int sock_fd) {

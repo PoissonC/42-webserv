@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/28 16:14:32 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 16:46:47 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,7 @@ void handle_read_file(State &state, Server &server) {
   if (state.file_fd < 0) {
     // TODO handle error
     std::cout << "Failed to open file." << std::endl;
-    state.stage = &send_response;
-    poll_to_out(state.conn_fd, server);
+    handle_error_response(state, 404, "Page not found or can't be opened.", server);
     return;
   }
 

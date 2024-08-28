@@ -1,6 +1,6 @@
 server {
     listen 0.0.0.0:8001;
-    server_name mywebserver.com;
+    server_name first.com;
 
     location / {
         autoindex off;
@@ -10,6 +10,29 @@ server {
     location /files {
         autoindex on;
         root ./files;
+        allow_methods GET POST DELETE;
+    }
+
+    location /cgi {
+        autoindex on;
+        cgi_pass ./cgi-bin;
+        allow_methods GET POST DELETE;
+    }
+
+}
+
+server {
+    listen 0.0.0.0:8001;
+    server_name second.com;
+
+    location / {
+        autoindex off;
+        allow_methods GET;
+    }
+
+    location /files {
+        autoindex off;
+        root ./sayhi;
         allow_methods GET POST DELETE;
     }
 

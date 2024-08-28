@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:08:17 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/28 16:10:36 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 17:45:45 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,9 +59,17 @@ std::vector<struct pollfd>::iterator Server::find_it_in_nxt(int fd) {
 }
 
 void Server::getServerConfig(State & state) {
-  std::string host = state.req.getHeaders().find("Host")->second;
+  std::map<std::string, std::string> headers = state.req.getHeaders();
+  std::map<std::string, std::string>::iterator host_it = headers.find("Host");
+  std::string host;
+  if (host_it != headers.end())
+    host = host_it->second;
   for(std::vector<Settings>::iterator settings_it = _settings.begin(); settings_it != _settings.end(); settings_it++) {
     if (state.sock_fd == settings_it->_socket_fd) {
+      if (host.empty()) {
+        state.server = *(settings_it->_servers.begin());
+        return;
+      }
       for (std::vector<ServerConfig>::iterator server_it = settings_it->_servers.begin(); server_it != settings_it->_servers.end(); server_it++) {
         std::vector<std::string> server_names = server_it->getServerNames();
         for (std::vector<std::string>::iterator server_name = server_names.begin(); server_name != server_names.end(); server_name++) {
@@ -70,9 +78,9 @@ void Server::getServerConfig(State & state) {
             return;
           }
         }
-        state.server = *(settings_it->_servers.begin());
-        return;
       }
+      state.server = *(settings_it->_servers.begin());
+      return;
     }
   }
 }
