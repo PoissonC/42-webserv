@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/27 22:27:26 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 16:14:00 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ public:
   void reset_attrs();
   void setup_cgi();
 
+  pid_t       cgiPID;
   size_t      bodyPos;
   size_t      contentLength;
   std::string request_buff;

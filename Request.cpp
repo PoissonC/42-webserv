@@ -137,8 +137,13 @@ int Request::checkRequest() {
     return (400);
   if (this->_headers.find("Host") == this->_headers.end())
     return (400);
-  if (this->_headers.find("Content-Length") != this->_headers.end()) {
-    if (this->_body.empty())
+  std::map<std::string, std::string>::iterator CL = _headers.find("Content-Length");
+  if (CL != this->_headers.end()) {
+    long contentLen = std::strtol(CL->second.c_str(), NULL, 10);
+    if (errno == ERANGE) {
+      return (400);
+    }
+    if (contentLen != (long)_body.size())
       return (400);
   }
   std::string hostUri = this->_uriComponents.host;

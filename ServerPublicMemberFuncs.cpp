@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:08:17 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/28 15:22:57 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 16:10:36 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,11 +109,22 @@ void Server::run() {
     //   std::cout << _cur_poll_fds[i].fd << ", ";
     // }
     //   std::cout << std::endl;
-    // checkTimeouotCGI();
-    int nfds = poll(_cur_poll_fds.data(), _cur_poll_fds.size(), -1);
+    checkTimeouotCGI();
+    int nfds = poll(_cur_poll_fds.data(), _cur_poll_fds.size(), SERVER_TIMEOUT);
     if (nfds == -1)
       throw std::runtime_error("poll failed");
-
+    // if (nfds == 0) {
+    //   std::cout << "Timeout! Close all connections." << std::endl;
+    //   while(!_states.empty()) {
+    //     std::cout << "Close connection from: " << _states[_states.size() - 1].conn_fd<< std::endl;
+    //     remove_from_poll(_states[_states.size() - 1].conn_fd);
+    //     remove_from_poll(_states[_states.size() - 1].file_fd);
+    //     remove_from_poll(_states[_states.size() - 1].cgi_pipe_r[0]);
+    //     remove_from_poll(_states[_states.size() - 1].cgi_pipe_w[1]);
+    //     close(_states[_states.size() - 1].conn_fd);
+    //     _states.pop_back();
+    //   }
+    // }
     // Process all returned events
     for (std::vector<struct pollfd>::iterator it = _cur_poll_fds.begin();
          it != _cur_poll_fds.end(); it++) {

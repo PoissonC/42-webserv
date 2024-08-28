@@ -6,13 +6,14 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:05:27 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/28 14:53:09 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 16:22:36 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "Server_helper.hpp"
 #include "handle_error_response.hpp"
+#include <signal.h>
 
 bool Server::_constructed = false;
 
@@ -96,19 +97,21 @@ std::vector<State>::iterator Server::getState(int fd) {
   return _states.end();
 }
 
-// void  Server::checkTimeouotCGI() {
-//   for (std::vector<struct pollfd>::iterator it = _cur_poll_fds.begin(); it != _cur_poll_fds.end(); it++) {
-//     std::vector<State>::iterator cur_state = getState(it->fd);
-//     if (cur_state == _states.end())
-//       continue;
-//     if (!cur_state->isCGIrunning)
-//       continue;
-//     if (cur_state->timeCGI - std::time(NULL) > CGI_TIMEOUT) {
-//       handle_error_response(*cur_state, 500, "Executing CGI script failed, waiting timeout.", *this);
-//     }
-//   }
-//   _cur_poll_fds = _next_poll_fds;
-// }
+void  Server::checkTimeouotCGI() {
+  for (std::vector<struct pollfd>::iterator it = _cur_poll_fds.begin(); it != _cur_poll_fds.end(); it++) {
+    std::vector<State>::iterator cur_state = getState(it->fd);
+    if (cur_state == _states.end())
+      continue;
+    if (!cur_state->isCGIrunning)
+      continue;
+    if (std::time(NULL) - cur_state->timeCGI > CGI_TIMEOUT) {
+      if (cur_state->cgiPID > 0)
+        kill(cur_state->cgiPID, SIGKILL);
+      handle_error_response(*cur_state, 502, "Executing CGI script failed, waiting timeout.", *this);
+    }
+  }
+  _cur_poll_fds = _next_poll_fds;
+}
 
 
 Server::~Server() { close_fds(_socks_fd); }

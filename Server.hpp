@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 22:00:02 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/27 23:39:36 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 15:47:45 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@
 #define BACK_LOG 32
 #define MAX_EVENTS 16
 #define CGI_TIMEOUT 1
+#define SERVER_TIMEOUT 1000
 
 class Server {
 

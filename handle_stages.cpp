@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/27 18:34:56 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 16:14:32 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,11 +130,11 @@ bool exe_cgi(State & state, Server & server) {
   }
 
   state.req.setEnvCGI(state, server.get_env());
-  pid_t cgi_proc = fork();
+  state.cgiPID = fork();
 
-  if (cgi_proc < 0)
+  if (state.cgiPID < 0)
     handle_error_response(state, 500, "Fail to fork the process to call CGI.", server);
-  if (cgi_proc == 0) {
+  if (state.cgiPID == 0) {
     if (state.cgi_pipe_w[0] != 0) {
       if (dup2(state.cgi_pipe_w[0], STDIN_FILENO) < 0)
         throw std::runtime_error("Child process dup2 failed");
@@ -153,6 +153,7 @@ bool exe_cgi(State & state, Server & server) {
     throw std::runtime_error("Fail to execute the CGI program.");
   }
   state.timeCGI = std::time(NULL);
+  state.isCGIrunning = true;
   if (state.cgi_pipe_w[0] != 0)
     close(state.cgi_pipe_w[0]);
   close(state.cgi_pipe_r[1]);

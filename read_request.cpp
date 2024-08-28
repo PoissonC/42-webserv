@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:29 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/27 23:49:48 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 16:27:57 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd,
     } else if (state->req.getMethod() == GET) {
       state->contentLength = 0;
     } else if (CL == headers.end()) {
-      handle_error_response(*state, 400, "Bad request.", server);
+      handle_error_response(*state, 400, "Bad request.\nThe POST/DELETE request doesn't contain Content-Length in header", server);
       return;
     }
     if (state->req.getMethod() != GET) {
@@ -60,7 +60,7 @@ void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd,
   if (rc < BUFFER_SIZE - 1 || state->contentLength == state->req.getBody().size()) {
     int status_code = state->req.checkRequest();
     if (status_code != 200) {
-      handle_error_response(*state, status_code, "Bad request.", server);
+      handle_error_response(*state, status_code, "Bad request.\nThe request format is not valid.", server);
       return;
     }
 	  handle_request(*state, server);
