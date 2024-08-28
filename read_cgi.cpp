@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/27 23:31:45 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 15:24:12 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,9 +35,9 @@ static bool cgi_parser(State & state) {
 }
 
 void read_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
-  if (!(pfd.revents & POLLIN))
+  if (!(pfd.revents & (POLLIN | POLLHUP)))
     return;
-
+  // std::cout << "Start reading CGI." << std::endl;
   char buf[BUFFER_SIZE];
   bzero(buf, sizeof(buf));
 

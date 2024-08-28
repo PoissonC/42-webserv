@@ -6,11 +6,12 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:08:17 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/27 23:59:50 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 15:22:57 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "handle_error_response.hpp"
 #include <signal.h>
 
 std::vector<struct pollfd>::iterator Server::getNextPfdsEnd() {
@@ -35,7 +36,8 @@ void Server::add_to_poll_out(int fd) {
 
 
 void Server::close_conn(int fd, std::vector<State>::iterator &cur_state) {
-  close(fd);
+  if (close(fd))
+    return;
   for (std::vector<struct pollfd>::iterator it = _next_poll_fds.begin();
        it != _next_poll_fds.end(); it++) {
     if (it->fd == fd) {
@@ -45,7 +47,6 @@ void Server::close_conn(int fd, std::vector<State>::iterator &cur_state) {
   }
   // This should destroy the cur_state element (free resources, ChatGPT says so)
   _states.erase(cur_state);
-  std::cout << "connection ends" << std::endl;
 }
 
 std::vector<struct pollfd>::iterator Server::find_it_in_nxt(int fd) {
@@ -108,7 +109,7 @@ void Server::run() {
     //   std::cout << _cur_poll_fds[i].fd << ", ";
     // }
     //   std::cout << std::endl;
-    checkTimeouotCGI();
+    // checkTimeouotCGI();
     int nfds = poll(_cur_poll_fds.data(), _cur_poll_fds.size(), -1);
     if (nfds == -1)
       throw std::runtime_error("poll failed");
@@ -129,10 +130,21 @@ void Server::run() {
         if (cur_state == _states.end())
           throw std::runtime_error("State not found");
 
-        // Close connection if any error occurs (http/1.1 keeps the connection)
         if (it->revents & (POLLHUP | POLLERR)) {
-          std::cout << "Close conn from Server::run()" << std::endl;
-          close_conn(it->fd, cur_state);
+          // Close connection if any error occurs (http/1.1 keeps the connection)
+          if (it->fd == cur_state->conn_fd)
+            close_conn(it->fd, cur_state);
+          else if (it->fd == cur_state->file_fd)
+            handle_error_response(*cur_state, 500, "Reading file failed.", *this);
+          else if (it->revents & (POLLHUP)) {
+            cur_state->stage(cur_state, *it, *this);
+          }
+          else
+            handle_error_response(*cur_state, 500, "Reading CGI failed.", *this);
+          // if (it->revents  & POLLERR)
+          //   std::cout << "Close conn from Server::run() due to error occured." << std::endl;
+          // else if (it->revents  & POLLHUP)
+          //   std::cout << "Close conn from Server::run() due to client hang up." << std::endl;
           continue;
         }
         // if (it->revents & POLLIN)

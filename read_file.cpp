@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/26 18:56:23 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 15:31:11 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ void  read_file(std::vector<State>::iterator &state, const struct pollfd &pfd, S
     handle_error_response(*state, 500, "Read file failed.", server);
     return;
   }
-    std::cout << "Reading...." << std::endl;
 
   state->file_buff += buf;
   // end of reading
