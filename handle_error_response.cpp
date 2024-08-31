@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 21:19:18 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/25 18:23:28 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/27 16:49:15 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,9 @@
 std::string getMimeType(const std::string& fileName);
 
 void handle_error_response(State & state, int status_code, const std::string body, Server & server) {
+  server.remove_from_poll(state.cgi_pipe_r[0]);
+  server.remove_from_poll(state.cgi_pipe_w[1]);
+  server.remove_from_poll(state.file_fd);
   state.res.setStatusCode(status_code);
   state.res.setBody(body);
   state.bytes_sent = 0;

@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/26 16:32:07 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 16:46:47 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,7 @@ void handle_read_file(State &state, Server &server) {
   if (state.file_fd < 0) {
     // TODO handle error
     std::cout << "Failed to open file." << std::endl;
-    state.stage = &send_response;
-    poll_to_out(state.conn_fd, server);
+    handle_error_response(state, 404, "Page not found or can't be opened.", server);
     return;
   }
 
@@ -116,18 +115,25 @@ static void check_cgi_extension(State & state) {
   state.original_path = find_cgi_path(programName);
 }
 
-void exe_cgi(State & state, Server & server) {
+bool exe_cgi(State & state, Server & server) {
+  if (access(state.cgi_path.c_str(), R_OK)) {
+    if (access(state.cgi_path.c_str(), F_OK))
+      handle_error_response(state, 404, "Requested file not found.", server);
+    else
+      handle_error_response(state, 403, "Access denied.", server);
+    return false;
+  }
   if (pipe(state.cgi_pipe_r) < 0) {
     handle_error_response(state, 500, "Server pipe failed, can't execute the cgi program.", server);
-    return;
+    return false;
   }
 
   state.req.setEnvCGI(state, server.get_env());
-  pid_t cgi_proc = fork();
+  state.cgiPID = fork();
 
-  if (cgi_proc < 0)
+  if (state.cgiPID < 0)
     handle_error_response(state, 500, "Fail to fork the process to call CGI.", server);
-  if (cgi_proc == 0) {
+  if (state.cgiPID == 0) {
     if (state.cgi_pipe_w[0] != 0) {
       if (dup2(state.cgi_pipe_w[0], STDIN_FILENO) < 0)
         throw std::runtime_error("Child process dup2 failed");
@@ -145,9 +151,12 @@ void exe_cgi(State & state, Server & server) {
     execve(state.original_path.c_str(), file_path.data(), state.req.getEnvCGI());
     throw std::runtime_error("Fail to execute the CGI program.");
   }
+  state.timeCGI = std::time(NULL);
+  state.isCGIrunning = true;
   if (state.cgi_pipe_w[0] != 0)
     close(state.cgi_pipe_w[0]);
   close(state.cgi_pipe_r[1]);
+  return true;
 }
 
 void handle_cgi(State & state, Server & server) {
@@ -156,6 +165,7 @@ void handle_cgi(State & state, Server & server) {
     return;
   }
 
-  exe_cgi(state, server);
+  if (!exe_cgi(state, server))
+    return;
   wait_to_read_cgi(state, server);
 }

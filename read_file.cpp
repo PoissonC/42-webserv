@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/26 14:54:59 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 15:31:11 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void  read_file(std::vector<State>::iterator &state, const struct pollfd &pfd, S
     return;
   char buf[BUFFER_SIZE];
   bzero(buf, BUFFER_SIZE);
-  ssize_t rc = read(state->file_fd, buf, BUFFER_SIZE);
+  ssize_t rc = read(state->file_fd, buf, BUFFER_SIZE - 1);
   
   if (rc < 0) {
     // TODO: handle error
@@ -33,11 +33,10 @@ void  read_file(std::vector<State>::iterator &state, const struct pollfd &pfd, S
     handle_error_response(*state, 500, "Read file failed.", server);
     return;
   }
-    std::cout << "Reading...." << std::endl;
 
   state->file_buff += buf;
   // end of reading
-  if (rc < BUFFER_SIZE) {
+  if (rc < BUFFER_SIZE - 1) {
     close(state->file_fd);
     server.remove_from_poll(state->file_fd);
     // TODO: Generate the response along with the file content

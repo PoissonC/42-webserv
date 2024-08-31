@@ -6,9 +6,11 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 20:07:38 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/26 14:53:05 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 17:16:30 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#pragma once
 
 #include "State.hpp"
 #include "Server_helper.hpp"

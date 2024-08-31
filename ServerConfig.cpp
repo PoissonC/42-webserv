@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 11:21:05 by yu                #+#    #+#             */
-/*   Updated: 2024/08/26 15:05:59 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/26 18:32:12 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,20 +89,11 @@ bool ServerConfig::hasRootLocation() const {
 static void locationCheck(const LocationConfig &loc) {
 	if (!loc.getIndex().empty() && !loc.getCgiPass().empty())
 		throw std::runtime_error("Location: Cannot have both index and cgi_pass");
-	std::string path = "./" + loc.getRoot();
+	std::string path = loc.getRoot();
 	DIR *dir = opendir(path.c_str());
 	if (dir == NULL)
 		throw std::runtime_error("Location: Root directory does not exist");
 	closedir(dir);
-	if (loc.getClientUpload() != "forbidden") {
-		if (path != "./")
-			dir = opendir((path + loc.getClientUpload()).c_str());
-		else
-			dir = opendir(loc.getClientUpload().c_str());
-		if (dir == NULL)
-			throw std::runtime_error("Client upload directory does not exist");
-		closedir(dir);
-	}
 	if (!loc.getCgiPass().empty()) {
 		dir = opendir((loc.getRoot() + loc.getCgiPass()).c_str());
 		if (dir == NULL)

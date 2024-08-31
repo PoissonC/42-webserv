@@ -6,13 +6,13 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/26 16:32:20 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/08/28 19:22:10 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "State.hpp"
 
-State::State(int fd, uint32_t client_addr, int socket): bytes_sent(0), req(std::string()), sock_fd(socket) , conn_fd(fd), stage(&read_request) {
+State::State(int fd, uint32_t client_addr, int socket): isFinishHeaders(false), cgiPID(-1), bodyPos(std::string::npos), contentLength(-1), bytes_sent(0), req(std::string()), sock_fd(socket) , conn_fd(fd), stage(&read_request), isCGIrunning(false) {
   std::ostringstream ip_stream;
   ip_stream << ((client_addr >> 24) & 0xFF) << '.'
             << ((client_addr >> 16) & 0xFF) << '.'
@@ -26,9 +26,27 @@ State::State(int fd, uint32_t client_addr, int socket): bytes_sent(0), req(std::
   std::cout << "New connection fd: " << fd << std::endl;
 }
 
+static void resetFd(int & fd) {
+  close(fd);
+  fd = 0;
+}
+
 void State::reset_attrs() {
-  bzero(cgi_pipe_r, sizeof(cgi_pipe_r));
-  bzero(cgi_pipe_w, sizeof(cgi_pipe_w));
+  cgiPID = -1;
+  bodyPos = std::string::npos;
+  contentLength = -1;
+  isCGIrunning = false;
+  isFinishHeaders = false;
+  if (file_fd != 0)
+    resetFd(file_fd);
+  if (cgi_pipe_r[0] != 0)
+    resetFd(cgi_pipe_r[0]);
+  if (cgi_pipe_r[1] != 0)
+    resetFd(cgi_pipe_r[1]);
+  if (cgi_pipe_w[0] != 0)
+    resetFd(cgi_pipe_w[0]);
+  if (cgi_pipe_w[1] != 0)
+    resetFd(cgi_pipe_w[1]);
   cgi_buff = std::string();
   request_buff = std::string();
   file_buff = std::string();
@@ -39,6 +57,5 @@ void State::reset_attrs() {
   bytes_sent = 0;
   server = ServerConfig();
   loc = LocationConfig();
-  request_buff = std::string();
   res = Response();
 }
