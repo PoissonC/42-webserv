@@ -219,7 +219,7 @@ void Request::setEnvCGI(State & state, char ** env) {
 		_envCGI.push_back("HTTP_HOST=" + _headers.find("Host")->second);
 	if (_headers.find("Content-Type") != _headers.end())
 		_envCGI.push_back("CONTENT_TYPE=" + _headers.find("Content-Type")->second);
-	if (_headers.find("Content-Length") != _headers.end())
+	if (_headers.find("Content-Length") != _headers.end() && _method != "GET")
 		_envCGI.push_back("CONTENT_LENGTH=" + _headers.find("Content-Length")->second);
 	_envCGI.push_back("PATH_INFO=" + state.cgi_path);
 	_envCGI.push_back("SCRIPT_FILENAME=" + state.cgi_path);
