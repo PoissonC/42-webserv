@@ -12,9 +12,9 @@
 
 #pragma once
 
+#include "MiddleStages.hpp"
 #include "Settings.hpp"
 #include "State.hpp"
-#include "MiddleStages.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <exception>
@@ -44,16 +44,15 @@ public:
 
   // getters
   std::vector<struct pollfd>::iterator getNextPfdsEnd();
-  char** get_env();
+  char **get_env();
   // member methods
   void close_conn(int fd, std::vector<State>::iterator &cur_state);
   void new_conns(int sock_fd);
   void add_to_poll_in(int fd);
   void add_to_poll_out(int fd);
-  std::vector< struct pollfd >::iterator find_it_in_nxt(int fd);
+  std::vector<struct pollfd>::iterator find_it_in_nxt(int fd);
   void getServerConfig(State &);
   void remove_from_poll(int fd);
-  
 
   //	Start waiting for events
   //		calling poll, accept, recv, send
@@ -76,5 +75,5 @@ private:
   void run_a_server(
       std::vector<Settings>::iterator &); // socket, setsockopt, bind, listen
 
-  void checkTimeouotCGI();
+  void checkTimeoutCGI();
 };

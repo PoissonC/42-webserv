@@ -8,5 +8,6 @@ typedef std::map<int, std::string> StatusCodeMap;
 
 const StatusCodeMap &getStatusCodeMap();
 std::string getStatusMessageFromCode(int code);
+std::string normalizeDirectoryPath(const std::string &path);
 
 #endif // UTILS_HPP

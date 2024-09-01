@@ -87,18 +87,24 @@ std::string getAddButtonMarkup(HtmlMarkup &directoryPage) {
       << "            var formData = new FormData();\n"
       << "            formData.append('file', file);\n"
       << "            var uploadPath = window.location.pathname;\n"
-      << "            fetch(uploadPath, {\n"
+      << "            fetch(`${uploadPath}`, {\n"
       << "                method: 'POST',\n"
       << "                body: formData\n"
       << "            })\n"
-      << "            .then(function(response) { return response.text(); })\n"
+      << "            .then(function(response) {\n"
+      << "                if (!response.ok) {\n"
+      << "                    throw new Error('Server error, status code: ' + "
+         "response.status);\n"
+      << "                }\n"
+      << "                return response.text();\n"
+      << "            })\n"
       << "            .then(function(data) {\n"
       << "                alert('File uploaded successfully');\n"
       << "                location.reload();\n"
       << "            })\n"
       << "            .catch(function(error) {\n"
       << "                console.error('Error:', error);\n"
-      << "                alert('Failed to upload file');\n"
+      << "                alert('Failed to upload file: ' + error.message);\n"
       << "            });\n"
       << "        }\n"
       << "    };\n"
@@ -140,15 +146,19 @@ std::string getFolderItemMarkup(const std::string &fullPath,
   return item;
 }
 
-std::string getFileItemMarkup(struct stat path_stat, const std::string &name) {
+std::string getFileItemMarkup(std::string &fullPath, struct stat path_stat,
+                              const std::string &name) {
   // @defgroup icons
   const std::string fileIcon = "&#10141;";
   const std::string notAvailableFileIcon = "&#10509";
   std::string item;
 
+  if (fullPath.substr(0, 1) == ".")
+    fullPath = fullPath.substr(1);
+
   item += "<li>";
   item += "<div>";
-  item += "<a href=\"" + name + "\">" + fileIcon + " " + name;
+  item += "<a href=\"" + fullPath + "\">" + fileIcon + " " + name;
   item += "<div>";
   item += "<span>" + formatSize(path_stat.st_size) + "</span>";
   item += "<p>|</p>";
@@ -208,9 +218,9 @@ std::string getDirectoryPage(State &state) {
 
   mainContent << "<ul>";
 
-  // Add "go back" link if possible
   if (state.file_path != "/") {
-    std::string parentPath = getParentPath(state.file_path);
+    std::string parentPath =
+        normalizeDirectoryPath(getParentPath(state.file_path));
     mainContent << "<li><div><a href=\"" << parentPath << "\">";
     mainContent << backIcon << "</div></a></li>";
   }
@@ -234,7 +244,7 @@ std::string getDirectoryPage(State &state) {
       if (S_ISDIR(path_stat.st_mode)) {
         directories.push_back(getFolderItemMarkup(fullPath, path_stat, name));
       } else {
-        files.push_back(getFileItemMarkup(path_stat, name));
+        files.push_back(getFileItemMarkup(fullPath, path_stat, name));
       }
     }
     closedir(dir);
