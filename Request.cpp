@@ -15,6 +15,7 @@ Request::Request(const std::string &request) : _req(request) {
   this->_uriComponents.path = "";
   this->_uriComponents.query = "";
   this->_uriComponents.fragment = "";
+  this->_cookie = NO_COOKIE;
   this->_envCGI = std::vector<std::string>();
   parse();
 }
@@ -52,6 +53,9 @@ void Request::parse() {
     }
   }
   this->_body = bodyStream.str();
+  _findCookie(this->_headers);
+//  std::cerr << "Cookie: " << this->_cookie << std::endl;
+//  std::cerr << createCookie() << std::endl;
 }
 
 void Request::_parseLineReq(std::string line, std::string &method,
@@ -236,4 +240,48 @@ char ** Request::getEnvCGI() const {
   envCGIChar[_envCGI.size()] = NULL;
 
   return (envCGIChar);
+}
+
+void Request::_findCookie(std::map<std::string, std::string> headers) {
+  std::string cookie;
+  if (headers.find("Cookie") != headers.end()) {
+	cookie = headers.find("Cookie")->second;
+  } else
+	cookie = "";
+  _cookie = _verifyCookie(cookie);
+}
+
+int Request::_verifyCookie(const std::string cookie) {
+  int cookieValue;
+  if (cookie.empty())
+	return NO_COOKIE;
+  try {
+	cookieValue = std::stoi(cookie);
+  } catch (std::exception &e) {
+	return WRONG_COOKIE;
+  }
+  if (cookieValue < NO_COOKIE || cookieValue >= WRONG_COOKIE)
+	return WRONG_COOKIE;
+  else
+	return cookieValue;
+}
+
+int Request::getCookie() const { return (this->_cookie); }
+
+std::string Request::createCookie()
+{
+  std::string cookie;
+  if (_cookie == NO_COOKIE)
+	cookie = "1";
+  else if (_cookie < WRONG_COOKIE)
+	cookie = std::to_string(_cookie + 1);
+  else
+	cookie = "";
+  if (cookie.empty())
+	return "";
+  else
+  {
+	cookie = "cookie=" + cookie + "; Path=/; HttpOnly"; //same site and secute to make it hiden
+	return cookie;
+  }
 }
