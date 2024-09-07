@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 10:44:50 by yu                #+#    #+#             */
-/*   Updated: 2024/09/07 15:36:04 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/07 16:02:55 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ public:
 	std::pair< int, std::string > getRedir() const;// if first is 0, no redir
 	bool getAllowMethods(e_methods method) const;
 	bool getAutoindex() const;
-	int getClientBodyBufferSize() const;
+	size_t getClientBodyBufferSize() const;
 
 private:
 	std::vector< std::string > _index;
@@ -57,7 +57,7 @@ private:
 	std::pair< int, std::string > _redir;
 	bool _allow_methods[3];
 	bool _autoindex;
-	long _client_body_buffer_size;
+	size_t _client_body_buffer_size;
 };
 
 LocationConfig parseLocation(const std::vector< std::string > &tokens, size_t &pos);

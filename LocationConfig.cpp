@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 12:34:34 by yu                #+#    #+#             */
-/*   Updated: 2024/09/07 15:53:09 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/07 16:03:01 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,7 @@ void LocationConfig::setAutoindex(const std::vector< std::string > &tokens, size
 		throw std::runtime_error("Expected ';' after autoindex");
 	pos++;// skip ';'
 }
-#include <iostream>
+
 void LocationConfig::setClientBodyBufferSize(const std::vector< std::string > &tokens, size_t &pos) {
 	_client_body_buffer_size = 0;
 	size_t i = 0;
@@ -115,11 +115,11 @@ void LocationConfig::setClientBodyBufferSize(const std::vector< std::string > &t
 		throw std::runtime_error("Invalid client_body_buffer_size");
 	if (i == tokens[pos].size() - 1) {
 		if (tokens[pos][i] == 'K' || tokens[pos][i] == 'k') {
-			if (_client_body_buffer_size > std::numeric_limits< int >::max() / 1024)
+			if (_client_body_buffer_size > (size_t)std::numeric_limits< int >::max() / 1024)
 				throw std::runtime_error("Invalid client_body_buffer_size");
 			_client_body_buffer_size *= 1024;
 		} else if (tokens[pos][i] == 'M' || tokens[pos][i] == 'm') {
-			if (_client_body_buffer_size > std::numeric_limits< int >::max() / (1024 * 1024))
+			if (_client_body_buffer_size > (size_t)std::numeric_limits< int >::max() / (1024 * 1024))
 				throw std::runtime_error("Invalid client_body_buffer_size");
 			_client_body_buffer_size *= 1024 * 1024;
 		} else {
@@ -159,7 +159,7 @@ bool LocationConfig::getAllowMethods(e_methods method) const {
 	return _allow_methods[method];
 }
 
-int LocationConfig::getClientBodyBufferSize() const {
+size_t LocationConfig::getClientBodyBufferSize() const {
 	return _client_body_buffer_size;
 }
 

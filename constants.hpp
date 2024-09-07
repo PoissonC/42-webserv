@@ -33,6 +33,7 @@
 
 #define MISSING_CONTENT_LENGTH "Missing Content-Length value"
 #define INVALID_CONTENT_LENGTH "Content-Length value is not valid"
+#define CONTENT_LENGTH_TOO_LARGE "Content-Length value is too large"
 #define FORBIDDEN_REQUEST_METHOD "Request method is forbidden"
 #define INVALID_REQUEST_FORMAT "Request format is not valid"
 

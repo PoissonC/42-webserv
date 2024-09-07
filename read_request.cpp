@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:29 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/28 20:55:39 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/07 16:05:18 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ static void finishReadingHeaders(std::vector<State>::iterator &state,
       return handle_error(*state, BAD_REQUEST, INVALID_CONTENT_LENGTH, server);
     }
   }
+  if (state->contentLength > state->loc.getClientBodyBufferSize())
+    return handle_error(*state, BAD_REQUEST, CONTENT_LENGTH_TOO_LARGE, server);
 }
 
 void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd,
