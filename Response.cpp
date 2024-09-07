@@ -3,7 +3,7 @@
 
 // @def constructor
 Response::Response() : _statusCode(OK), _body("") {
-  _headers["Content-Type"] = "text/html";
+  _headers["Content-Type"] = "text/plain";
 
   _statusMessages[100] = "Continue";
   _statusMessages[101] = "Switching Protocols";

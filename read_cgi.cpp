@@ -16,25 +16,65 @@
 #include "handle_error.hpp"
 #include "helper.hpp"
 
-static bool cgi_parser(State &state) {
-  size_t headerEndPos = state.cgi_buff.find("\r\n\r\n");
-  if (headerEndPos == std::string::npos) {
-    state.res.setBody(state.cgi_buff);
-    state.response_buff = state.res.generateResponseString();
-    return true;
-  }
-  std::vector<std::string> headers =
-      split(state.cgi_buff.substr(0, headerEndPos), ':');
-  if (headers.size() % 2 != 0)
+bool isValidStatusCode(std::string statusCodeString) {
+  if (statusCodeString.length() < 3)
     return false;
-  for (std::vector<std::string>::iterator it = headers.begin();
-       it != headers.end(); it++) {
-    std::vector<std::string>::iterator key = it++;
-    state.res.setHeader(*key, (*it).substr(1));
+
+  for (int i = 0; statusCodeString[i]; ++i) {
+    if (!std::isdigit(statusCodeString[i]))
+      return false;
   }
-  state.res.setBody(state.cgi_buff.substr(headerEndPos + 4));
-  state.response_buff = state.res.generateResponseString();
   return true;
+}
+
+int populateResFromCgiOutput(State &state) {
+  size_t headersEndPos = state.cgi_buff.find("\r\n\r\n");
+  if (headersEndPos == std::string::npos)
+    return FAILURE;
+
+  std::string headers = state.cgi_buff.substr(0, headersEndPos);
+  std::string body =
+      state.cgi_buff.substr(headersEndPos + 4); // Skip "\r\n\r\n"
+
+  std::istringstream headerStream(headers);
+  std::string headerLine;
+  bool isStatusFound = false;
+
+  while (std::getline(headerStream, headerLine)) {
+    if (headerLine.empty())
+      continue;
+
+    while (headerLine.back() == '\r')
+      headerLine.pop_back(); // Remove trailing '\r'
+
+    size_t delimiterPos = headerLine.find(": ");
+    if (delimiterPos != std::string::npos) {
+      std::string key = headerLine.substr(0, delimiterPos);
+      std::string value = headerLine.substr(delimiterPos + 2);
+
+      if (key == "Status") {
+        if (isStatusFound)
+          continue;
+
+        isStatusFound = true;
+        std::string statusCodeString = value.substr(0, 3);
+        if (isValidStatusCode(statusCodeString)) {
+          int statusCode = std::stoi(value.substr(0, 3));
+          state.res.setStatusCode(statusCode);
+        } else {
+          return FAILURE;
+        }
+      } else {
+        state.res.setHeader(key, value);
+      }
+    }
+  }
+
+  if (!isStatusFound)
+    state.res.setStatusCode(200);
+  state.res.setBody(body);
+
+  return SUCCESS;
 }
 
 void read_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd,
@@ -58,10 +98,12 @@ void read_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd,
   if (rc < BUFFER_SIZE - 1) {
     close(state->cgi_pipe_r[0]);
     server.remove_from_poll(state->cgi_pipe_r[0]);
-    if (!cgi_parser(*state))
+    if (populateResFromCgiOutput(*state) == FAILURE) {
       return handle_error(*state, INTERNAL_SERVER_ERROR,
                           READ_CGI_OUTPUT_FAILURE, server);
+    }
 
+    state->response_buff = state->res.generateResponseString();
     wait_to_send_resonpse(*state, server);
   }
 }

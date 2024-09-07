@@ -1,6 +1,8 @@
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
 
+#define SUCCESS 0
+#define FAILURE (-1)
 #define UNDEFINED (-2)
 
 // @defgroup status codes
