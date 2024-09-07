@@ -11,7 +11,6 @@ server {
         autoindex on;
         root ./files;
         allow_methods GET POST DELETE;
-        return 301 http://google.com;
     }
 
     location /cgi {

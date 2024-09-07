@@ -12,9 +12,6 @@
 #define INSUFFICIENT_STORAGE 507
 #define SERVICE_UNAVAILABLE 503
 
-// @def default response body content
-#define DEFAULT_BODY "Hello, World!"
-
 // @defgroup error messages
 #define STATE_NOT_FOUND "State not found"
 #define SERVER_DUPLICATE "Server instance already exists"

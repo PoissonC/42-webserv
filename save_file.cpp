@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/25 18:21:14 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/07 19:11:42 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@ void save_file(std::vector<State>::iterator &state, const struct pollfd &pfd,
   if (wc == (long)state->req.getBody().size() - state->bytes_sent) {
     close(pfd.fd);
     server.remove_from_poll(pfd.fd);
-
     return wait_to_send_resonpse(*state, server);
   }
   state->bytes_sent += wc;

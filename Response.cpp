@@ -2,7 +2,7 @@
 #include "constants.hpp"
 
 // @def constructor
-Response::Response() : _statusCode(OK), _body(DEFAULT_BODY) {
+Response::Response() : _statusCode(OK), _body("") {
   _headers["Content-Type"] = "text/html";
 
   _statusMessages[100] = "Continue";
