@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/28 15:24:12 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/07 19:24:36 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ int populateResFromCgiOutput(State &state) {
     if (headerLine.empty())
       continue;
 
-    while (headerLine.back() == '\r')
-      headerLine.pop_back(); // Remove trailing '\r'
+    while (*headerLine.rbegin() == '\r')
+      headerLine.resize(headerLine.size() - 1); // Remove trailing '\r'
 
     size_t delimiterPos = headerLine.find(": ");
     if (delimiterPos != std::string::npos) {
@@ -59,7 +59,7 @@ int populateResFromCgiOutput(State &state) {
         isStatusFound = true;
         std::string statusCodeString = value.substr(0, 3);
         if (isValidStatusCode(statusCodeString)) {
-          int statusCode = std::stoi(value.substr(0, 3));
+          int statusCode = std::strtol(value.substr(0, 3).c_str(), NULL, 10);
           state.res.setStatusCode(statusCode);
         } else {
           return FAILURE;
