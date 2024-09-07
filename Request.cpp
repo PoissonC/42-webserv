@@ -56,9 +56,9 @@ void Request::parse() {
   _findCookie(this->_headers);
 // TESTER COOKIE
 //  if (getHeaders().find("Cookie") == getHeaders().end())
-//	std::cerr << "No cookie" << std::endl;
+// 	std::cerr << "No cookie" << std::endl;
 //  else
-//	std::cerr << getHeaders().find("Cookie")->second << std::endl;
+// 	std::cerr << getHeaders().find("Cookie")->second << std::endl;
 //  std::cerr << "Cookie: " << this->_cookie << std::endl;
 //  std::cerr << createCookie() << std::endl;
 }
@@ -261,7 +261,7 @@ int Request::_verifyCookie(const std::string cookie) {
   if (cookie.empty())
 	return NO_COOKIE;
   try {
-	cookieValue = std::stoi(cookie);
+	cookieValue = std::strtol(cookie.c_str(), NULL, 10);
   } catch (std::exception &e) {
 	return WRONG_COOKIE;
   }
@@ -275,20 +275,17 @@ int Request::getCookie() const { return (this->_cookie); }
 
 std::string Request::createCookie()
 {
-  std::string cookie;
+  std::stringstream cookie;
+  cookie << "Cookie=";
   if (_cookie == NO_COOKIE)
-	cookie = "1";
+	cookie << "1";
   else if (_cookie == COOKIE_8)
-	cookie = std::to_string(COOKIE_8);
+	cookie << COOKIE_8;
   else if (_cookie < WRONG_COOKIE)
-	cookie = std::to_string(_cookie + 1);
-  else
-	cookie = "";
-  if (cookie.empty())
-	return "";
-  else
-  {
-	cookie = "Cookie=" + cookie + "; Secure; HttpOnly; SameSite=Strict";
-	return cookie;
+	cookie << _cookie + 1;
+  else {
+    return "";
   }
+	cookie << "; Secure; HttpOnly; SameSite=Strict";
+	return cookie.str();
 }
