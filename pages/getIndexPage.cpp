@@ -30,6 +30,7 @@ std::string getIndexPage(State &state) {
   }
   mainContent << "</ul></section>";
 
+  indexPage.addHeaderContent(getHeaderContent(indexPage, state));
   indexPage.addMainContent(mainContent.str());
 
   indexPage.addStyle(ulStyles);

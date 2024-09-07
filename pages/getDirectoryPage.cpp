@@ -212,7 +212,7 @@ std::string getDirectoryPage(State &state) {
 
   // Add title line
   mainContent << "<div>";
-  mainContent << "<p>" << state.file_path << "/</p>";
+  mainContent << "<p>" << normalizeDirectoryPath(state.file_path) << "/</p>";
   mainContent << getAddButtonMarkup(directoryPage);
   mainContent << "</div>";
 
@@ -222,7 +222,7 @@ std::string getDirectoryPage(State &state) {
     std::string parentPath =
         normalizeDirectoryPath(getParentPath(state.file_path));
     mainContent << "<li><div><a href=\"" << parentPath << "\">";
-    mainContent << backIcon << "</div></a></li>";
+    mainContent << backIcon << "</a></div></li>";
   }
 
   DIR *dir;
@@ -236,7 +236,8 @@ std::string getDirectoryPage(State &state) {
       if (name == "." || name == "..")
         continue;
 
-      std::string fullPath = state.file_path + "/" + name;
+      std::string fullPath =
+          normalizeDirectoryPath(state.file_path) + "/" + name;
       struct stat path_stat;
       stat(fullPath.c_str(), &path_stat);
 
@@ -269,6 +270,7 @@ std::string getDirectoryPage(State &state) {
   }
 
   mainContent << "</ul></section>";
+  directoryPage.addHeaderContent(getHeaderContent(directoryPage, state));
   directoryPage.addMainContent(mainContent.str());
   applyStyles(directoryPage);
   return directoryPage.generateMarkup();

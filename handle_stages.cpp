@@ -38,6 +38,7 @@ void handle_read_file(State &state, Server &server) {
 
     if (!isIndexFileFound) {
       state.res.setHeader("Content-Type", "text/html");
+      state.res.setHeader("Set-Cookie", state.req.createCookie());
       if (state.loc.getAutoindex()) {
         state.res.setBody(getDirectoryPage(state));
         state.response_buff = state.res.generateResponseString();

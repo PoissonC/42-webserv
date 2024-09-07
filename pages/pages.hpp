@@ -9,5 +9,6 @@
 std::string getIndexPage(State &state);
 std::string getDirectoryPage(State &state);
 std::string getErrorPage(int statusCode, const std::string &errorMessage);
+std::string getHeaderContent(HtmlMarkup &page, State &state);
 
 #endif // PAGES_HPP

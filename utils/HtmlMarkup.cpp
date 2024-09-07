@@ -8,6 +8,7 @@ const std::string HtmlMarkup::_defaultHtmlStyles =
     "html { scroll-behavior: smooth; margin: 0; padding: 0; }"
     "h1, h2, h3, h4, h5, h6, p { margin: 0; padding: 0; }"
     "a { text-decoration: none; color: #eee; } a:visited { color: #aaa }";
+const std::string HtmlMarkup::_defaultHeaderStyles = "h1 { margin: 20px; }";
 const std::string HtmlMarkup::_defaultBodyStyles =
     "body { "
     "font-family: Courier, slab-serif, sans-serif; color: #fff; "
@@ -15,7 +16,6 @@ const std::string HtmlMarkup::_defaultBodyStyles =
     "grid-template-columns: minmax(1024px, 1fr);"
     "grid-template-rows: max-content auto max-content;"
     "min-height: 100vh; width: 100vw; }";
-const std::string HtmlMarkup::_defaultHeaderStyles = "h1 { margin: 20px; }";
 const std::string HtmlMarkup::_defaultMainStyles =
     "main { background-color: "
     "#eee; color: #111; padding: 20px; }";
