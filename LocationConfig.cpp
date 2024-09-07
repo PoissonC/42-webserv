@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 12:34:34 by yu                #+#    #+#             */
-/*   Updated: 2024/08/26 17:13:39 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/07 15:53:09 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,21 +94,26 @@ void LocationConfig::setAutoindex(const std::vector< std::string > &tokens, size
 		throw std::runtime_error("Expected ';' after autoindex");
 	pos++;// skip ';'
 }
-
+#include <iostream>
 void LocationConfig::setClientBodyBufferSize(const std::vector< std::string > &tokens, size_t &pos) {
 	_client_body_buffer_size = 0;
 	size_t i = 0;
-	for (; i < tokens[pos].size(); i++) {
+	if (tokens[pos][0] == ';')
+		throw std::runtime_error("Invalid client_body_buffer_size");
+	while (i < tokens[pos].size()) {
 		if (isdigit(tokens[pos][i])) {
 			_client_body_buffer_size *= 10;
 			_client_body_buffer_size += tokens[pos][i] - '0';
 			if (_client_body_buffer_size < 0)
 				throw std::runtime_error("Invalid client_body_buffer_size");
+			i++;
 		}
+		else
+			break;
 	}
 	if (i == 0)
 		throw std::runtime_error("Invalid client_body_buffer_size");
-	if (i != tokens[pos].size()) {
+	if (i == tokens[pos].size() - 1) {
 		if (tokens[pos][i] == 'K' || tokens[pos][i] == 'k') {
 			if (_client_body_buffer_size > std::numeric_limits< int >::max() / 1024)
 				throw std::runtime_error("Invalid client_body_buffer_size");
@@ -120,6 +125,8 @@ void LocationConfig::setClientBodyBufferSize(const std::vector< std::string > &t
 		} else {
 			throw std::runtime_error("Invalid client_body_buffer_size");
 		}
+	}	else {
+		throw std::runtime_error("Invalid client_body_buffer_size");
 	}
 	if (tokens[++pos] != ";")
 		throw std::runtime_error("Expected ';' after client_body_buffer_size");

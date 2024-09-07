@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 10:44:50 by yu                #+#    #+#             */
-/*   Updated: 2024/08/26 17:13:54 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/07 15:36:04 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ private:
 	std::pair< int, std::string > _redir;
 	bool _allow_methods[3];
 	bool _autoindex;
-	int _client_body_buffer_size;
+	long _client_body_buffer_size;
 };
 
 LocationConfig parseLocation(const std::vector< std::string > &tokens, size_t &pos);
