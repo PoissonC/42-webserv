@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 12:34:34 by yu                #+#    #+#             */
-/*   Updated: 2024/09/07 16:03:01 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/07 18:09:33 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ void LocationConfig::setRedir(const std::vector< std::string > &tokens, size_t &
 		_redir.first = 308;
 	else
 		throw std::runtime_error("Invalid return code");
-	if (pos + 1 == tokens.size())
+	if (pos + 1 == tokens.size() || tokens[pos + 1] == ";")
 		throw std::runtime_error("Expected return url");
 	_redir.second = tokens[++pos];
 	if (tokens[++pos] != ";")

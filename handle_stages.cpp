@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/01 16:17:25 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/07 18:06:32 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ void handle_read_file(State &state, Server &server) {
       }
     }
   } else {
-    state.file_fd = open("", O_RDONLY);
+    state.file_fd = open(state.file_path.c_str(), O_RDONLY);
     state.res.setHeader("Content-Type", getMimeType(state.file_path));
   }
 

@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:29 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/07 16:05:18 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/07 18:36:34 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ class Server;
 
 static void finishReadingHeaders(std::vector<State>::iterator &state,
                                  Server &server) {
-  std::cout << "Finished reading headers." << std::endl;
+  // std::cout << "Finished reading headers." << std::endl;
   state->req = Request(state->request_buff);
   std::map<std::string, std::string> headers = state->req.getHeaders();
   std::map<std::string, std::string>::iterator CL =
@@ -68,8 +68,9 @@ void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd,
   if (rc < BUFFER_SIZE - 1 ||
       state->contentLength == state->req.getBody().size()) {
     int status_code = state->req.checkRequest();
-    if (status_code != 200)
+    if (status_code != 200) {
       return handle_error(*state, status_code, INVALID_REQUEST_FORMAT, server);
+    }
 
     handle_request(*state, server);
   }

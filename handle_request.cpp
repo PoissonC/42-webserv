@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/23 18:06:50 by jhurpy            #+#    #+#             */
-/*   Updated: 2024/08/27 19:01:12 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/07 18:36:14 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ static LocationConfig &
 compare_location(State &state,
                  std::map<std::string, LocationConfig> &locationMap) {
   std::string path = state.req.getUriComponents().path;
-  std::cout << "The whole path in uri: " << path << std::endl;
+  // std::cout << "The whole path in uri: " << path << std::endl;
 
   while (!path.empty()) {
     for (std::map<std::string, LocationConfig>::iterator it =
@@ -62,12 +62,19 @@ void handle_request(State &state, Server &server) {
   state.loc = compare_location(state, location);
   if (!compare_method(state, state.loc, server))
     return;
-  std::cout << "original_path: " << state.original_path << std::endl;
-  std::cout << "root of location: " << state.loc.getRoot() << std::endl;
+  // std::cout << "original_path: " << state.original_path << std::endl;
+  // std::cout << "root of location: " << state.loc.getRoot() << std::endl;
+  std::pair<int, std::string> rdr = state.loc.getRedir();
+  if (rdr.first != 0) {
+    state.res.setStatusCode(rdr.first);
+    state.res.setHeader("Location", rdr.second);
+    wait_to_send_resonpse(state, server);
+    return ;
+  }
   if (state.loc.getCgiPass().size() > 0) {
     state.cgi_path =
         state.loc.getRoot() + state.loc.getCgiPass() + state.original_path;
-    std::cout << "Full CGI path: " << state.cgi_path << std::endl;
+    // std::cout << "Full CGI path: " << state.cgi_path << std::endl;
 
     struct stat path_stat;
     stat(state.cgi_path.c_str(), &path_stat);
@@ -82,13 +89,12 @@ void handle_request(State &state, Server &server) {
   state.file_path = state.loc.getRoot() + state.original_path;
   if (*state.file_path.rbegin() == '/')
     state.file_path.resize(state.file_path.size() - 1);
-  std::cout << "file_path: " << state.file_path << std::endl;
+  // std::cout << "file_path: " << state.file_path << std::endl;
   if (state.req.getMethod() == GET) {
     handle_read_file(state, server);
   } else if (state.req.getMethod() == POST) {
     if (state.file_path.find("../") != std::string::npos)
       return handle_error(state, BAD_REQUEST, READ_FILE_FAILURE, server);
-
     handle_save_file(state, server);
   } else if (state.req.getMethod() == DELETE) {
     if (state.file_path.find("../") != std::string::npos)

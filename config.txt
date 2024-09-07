@@ -11,6 +11,7 @@ server {
         autoindex on;
         root ./files;
         allow_methods GET POST DELETE;
+        return 301 http://google.com;
     }
 
     location /cgi {
@@ -34,7 +35,7 @@ server {
         autoindex off;
         root ./sayhi;
         allow_methods GET POST DELETE;
-        client_max_body_size 11k;
+        client_max_body_size 1k;
     }
 
     location /cgi {
