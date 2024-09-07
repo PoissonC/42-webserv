@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   handle_error_response.hpp                          :+:      :+:    :+:   */
+/*   handle_error.hpp                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -12,9 +12,9 @@
 
 #pragma once
 
-#include "State.hpp"
 #include "Server_helper.hpp"
+#include "State.hpp"
 #include <algorithm>
 
-
-void handle_error_response(State & state, int status_code, const std::string body, Server & server);
+void handle_error(State &state, int statusCode, const std::string &context,
+                  Server &server);

@@ -11,7 +11,8 @@
 /* ************************************************************************** */
 
 #include "handle_stages.hpp"
-#include "handle_error_response.hpp"
+#include "constants.hpp"
+#include "handle_error.hpp"
 #include "helper.hpp"
 #include "pages/pages.hpp"
 
@@ -41,67 +42,59 @@ void handle_read_file(State &state, Server &server) {
         state.res.setBody(getDirectoryPage(state));
         state.response_buff = state.res.generateResponseString();
         state.stage = &send_response;
-        poll_to_out(state.conn_fd, server);
-        return;
+
+        return poll_to_out(state.conn_fd, server);
       } else {
         state.res.setBody(getIndexPage(state));
         state.response_buff = state.res.generateResponseString();
         state.stage = &send_response;
-        poll_to_out(state.conn_fd, server);
-        return;
+
+        return poll_to_out(state.conn_fd, server);
       }
     }
   } else {
-    state.file_fd = open(state.file_path.c_str(), O_RDONLY);
+    state.file_fd = open("", O_RDONLY);
     state.res.setHeader("Content-Type", getMimeType(state.file_path));
   }
 
-  if (state.file_fd < 0) {
-    // TODO handle error
-    std::cout << "Failed to open file." << std::endl;
-    handle_error_response(state, 404, "Page not found or can't be opened.", server);
-    return;
-  }
+  if (state.file_fd < 0)
+    return handle_error(state, UNDEFINED, READ_FILE_FAILURE, server);
 
   wait_to_read_file(state, server);
 }
 
-void handle_save_file(State & state, Server & server) {
-  state.file_fd = open(state.file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-  if (state.file_fd < 0) {
-    // TODO: handle error
-    handle_error_response(state, 500, "Server can't save the file.", server);
-    return;
-  }
+void handle_save_file(State &state, Server &server) {
+  state.file_fd =
+      open(state.file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  if (state.file_fd < 0)
+    return handle_error(state, UNDEFINED, SAVE_FILE_FAILURE, server);
+
   wait_to_save_file(state, server);
 }
 
-void handle_delete_file(State & state, Server & server) {
-  if (remove(state.file_path.c_str()) < 0) {
-    handle_error_response(state, 500, "Server can't delete the file.", server);
-    return;
-  }
-  state.res.setBody("File is deleted successfully");
+void handle_delete_file(State &state, Server &server) {
+  if (remove(state.file_path.c_str()) < 0)
+    return handle_error(state, UNDEFINED, DELETE_FILE_FAILURE, server);
+
   wait_to_send_resonpse(state, server);
 }
 
-static void cgi_post(State & state, Server & server) {
-  if (pipe(state.cgi_pipe_w) < 0) {
-    handle_error_response(state, 500, "Pipe failed when try to send data to CGI\n", server);
-    return;
-  }
+static void cgi_post(State &state, Server &server) {
+  if (pipe(state.cgi_pipe_w) < 0)
+    return handle_error(state, UNDEFINED, CGI_DATA_SEND_FAILURE, server);
+
   state.cgi_buff = state.req.getBody();
   wait_to_write_cgi(state, server);
 }
 
-static void check_cgi_extension(State & state) {
+static void check_cgi_extension(State &state) {
   size_t dotPos = state.cgi_path.find_last_of('.');
   if (dotPos == std::string::npos)
-    throw std::runtime_error("CGI file doesn't have extension.\n");
+    throw std::runtime_error(CGI_EXECUTION_FAILURE);
   std::string extension = state.cgi_path.substr(dotPos);
   // Convert extension to lowercase
   for (size_t i = 0; i < extension.length(); ++i) {
-      extension[i] = std::tolower(extension[i]);
+    extension[i] = std::tolower(extension[i]);
   }
   std::string programName;
   if (extension == ".py")
@@ -115,16 +108,16 @@ static void check_cgi_extension(State & state) {
   state.original_path = find_cgi_path(programName);
 }
 
-bool exe_cgi(State & state, Server & server) {
+bool exe_cgi(State &state, Server &server) {
   if (access(state.cgi_path.c_str(), R_OK)) {
     if (access(state.cgi_path.c_str(), F_OK))
-      handle_error_response(state, 404, "Requested file not found.", server);
+      handle_error(state, NOT_FOUND, std::string(), server);
     else
-      handle_error_response(state, 403, "Access denied.", server);
+      handle_error(state, FORBIDDEN, std::string(), server);
     return false;
   }
   if (pipe(state.cgi_pipe_r) < 0) {
-    handle_error_response(state, 500, "Server pipe failed, can't execute the cgi program.", server);
+    handle_error(state, UNDEFINED, CGI_EXECUTION_FAILURE, server);
     return false;
   }
 
@@ -132,24 +125,25 @@ bool exe_cgi(State & state, Server & server) {
   state.cgiPID = fork();
 
   if (state.cgiPID < 0)
-    handle_error_response(state, 500, "Fail to fork the process to call CGI.", server);
+    handle_error(state, UNDEFINED, CGI_EXECUTION_FAILURE, server);
   if (state.cgiPID == 0) {
     if (state.cgi_pipe_w[0] != 0) {
       if (dup2(state.cgi_pipe_w[0], STDIN_FILENO) < 0)
-        throw std::runtime_error("Child process dup2 failed");
+        throw std::runtime_error(CGI_EXECUTION_FAILURE);
       close(state.cgi_pipe_w[0]);
     }
     if (dup2(state.cgi_pipe_r[1], STDOUT_FILENO) < 0)
-      throw std::runtime_error("Child process dup2 failed");
+      throw std::runtime_error(CGI_EXECUTION_FAILURE);
     close(state.cgi_pipe_r[0]);
     close(state.cgi_pipe_r[1]);
-    std::vector<char*> file_path;
+    std::vector<char *> file_path;
     check_cgi_extension(state);
-    file_path.push_back(const_cast<char*>(state.original_path.c_str()));
-    file_path.push_back(const_cast<char*>(state.cgi_path.c_str()));
+    file_path.push_back(const_cast<char *>(state.original_path.c_str()));
+    file_path.push_back(const_cast<char *>(state.cgi_path.c_str()));
     file_path.push_back(NULL);
-    execve(state.original_path.c_str(), file_path.data(), state.req.getEnvCGI());
-    throw std::runtime_error("Fail to execute the CGI program.");
+    execve(state.original_path.c_str(), file_path.data(),
+           state.req.getEnvCGI());
+    throw std::runtime_error(CGI_EXECUTION_FAILURE);
   }
   state.timeCGI = std::time(NULL);
   state.isCGIrunning = true;
@@ -159,7 +153,7 @@ bool exe_cgi(State & state, Server & server) {
   return true;
 }
 
-void handle_cgi(State & state, Server & server) {
+void handle_cgi(State &state, Server &server) {
   if (state.req.getMethod() == POST) {
     cgi_post(state, server);
     return;
