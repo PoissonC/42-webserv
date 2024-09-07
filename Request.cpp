@@ -54,6 +54,11 @@ void Request::parse() {
   }
   this->_body = bodyStream.str();
   _findCookie(this->_headers);
+// TESTER COOKIE
+//  if (getHeaders().find("Cookie") == getHeaders().end())
+//	std::cerr << "No cookie" << std::endl;
+//  else
+//	std::cerr << getHeaders().find("Cookie")->second << std::endl;
 //  std::cerr << "Cookie: " << this->_cookie << std::endl;
 //  std::cerr << createCookie() << std::endl;
 }
@@ -273,6 +278,8 @@ std::string Request::createCookie()
   std::string cookie;
   if (_cookie == NO_COOKIE)
 	cookie = "1";
+  else if (_cookie == COOKIE_8)
+	cookie = std::to_string(COOKIE_8);
   else if (_cookie < WRONG_COOKIE)
 	cookie = std::to_string(_cookie + 1);
   else
@@ -281,7 +288,7 @@ std::string Request::createCookie()
 	return "";
   else
   {
-	cookie = "cookie=" + cookie + "; Path=/; HttpOnly"; //same site and secute to make it hiden
+	cookie = "Cookie=" + cookie + "; Secure; HttpOnly; SameSite=Strict";
 	return cookie;
   }
 }
