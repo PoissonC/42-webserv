@@ -1,8 +1,8 @@
 #include "Response.hpp"
+#include "constants.hpp"
 
 // @def constructor
-Response::Response()
-    : _statusCode(200), _statusMessage("OK"), _body("Hello, World!") {
+Response::Response() : _statusCode(OK), _body(DEFAULT_BODY) {
   _headers["Content-Type"] = "text/html";
 
   _statusMessages[100] = "Continue";
@@ -42,9 +42,8 @@ Response::Response()
   _statusMessages[503] = "Service Unavailable";
   _statusMessages[504] = "Gateway Timeout";
   _statusMessages[505] = "HTTP Version Not Supported";
-
- //link for status code: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#information_responses
-
+  _statusMessages[506] = "Variant Also Negotiates";
+  _statusMessages[507] = "Insufficient Storage";
 };
 
 // @def destructor
@@ -53,20 +52,9 @@ Response::~Response(){};
 // @defgroup setters
 void Response::setStatusCode(int code) {
   _statusMessage = _statusMessages[code];
-  if (_statusMessage.size() == 0)
-    _statusMessage = "Undefined";
-  _statusCode = code; 
-  }
-
-void Response::setStatusMessage(const int code) {
-  std::map<int, std::string>::const_iterator it = _statusMessages.find(code);
-  if (it != _statusMessages.end()) {
-	_statusMessage = it->second;
-  }
-  else {
-	setStatusCode(500);
-	_statusMessage = "Internal Server Error";
-  }
+  if (_statusMessage.empty())
+    _statusMessage = "Unknown error";
+  _statusCode = code;
 }
 
 void Response::setHeader(const std::string &key, const std::string &value) {

@@ -11,29 +11,28 @@
 /* ************************************************************************** */
 
 #include "MiddleStages.hpp"
-#include "handle_error_response.hpp"
+#include "constants.hpp"
+#include "handle_error.hpp"
 
-void save_file(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
+void save_file(std::vector<State>::iterator &state, const struct pollfd &pfd,
+               Server &server) {
   if (!(pfd.revents & POLLOUT))
     return;
 
   ssize_t wc = write(pfd.fd, state->req.getBody().c_str() + state->bytes_sent,
-                    state->req.getBody().size() - state->bytes_sent);
+                     state->req.getBody().size() - state->bytes_sent);
 
-  if (wc < 0){
+  if (wc < 0) {
     close(pfd.fd);
     server.remove_from_poll(pfd.fd);
-    // TODO: handle error
-    handle_error_response(*state, 500, "Write content to opened file failed.", server);
-    return;
+
+    return handle_error(*state, UNDEFINED, SAVE_FILE_FAILURE, server);
   }
   if (wc == (long)state->req.getBody().size() - state->bytes_sent) {
     close(pfd.fd);
     server.remove_from_poll(pfd.fd);
-    // TODO: generates the response to indicate succsess
-    state->res.setBody("File uploaded successfully.\n");
-    wait_to_send_resonpse(*state, server);
-    return;
+
+    return wait_to_send_resonpse(*state, server);
   }
   state->bytes_sent += wc;
 }

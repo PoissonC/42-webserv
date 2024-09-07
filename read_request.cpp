@@ -14,29 +14,31 @@ class Server;
 
 #include "MiddleStages.hpp"
 #include "Server_helper.hpp"
-#include "handle_error_response.hpp"
+#include "constants.hpp"
+#include "handle_error.hpp"
 
-static void finishReadingHeaders(std::vector<State>::iterator &state, Server & server) {
+static void finishReadingHeaders(std::vector<State>::iterator &state,
+                                 Server &server) {
   std::cout << "Finished reading headers." << std::endl;
   state->req = Request(state->request_buff);
   std::map<std::string, std::string> headers = state->req.getHeaders();
-  std::map<std::string, std::string>::iterator CL = headers.find("Content-Length");
+  std::map<std::string, std::string>::iterator CL =
+      headers.find("Content-Length");
   if (CL == headers.end()) {
     if (state->req.getMethod() == POST || state->req.getMethod() == DELETE) {
-      handle_error_response(*state, 400, "Bad request.\nThe POST/DELETE request doesn't contain Content-Length in header", server);
-      return;
+      return handle_error(*state, BAD_REQUEST, MISSING_CONTENT_LENGTH, server);
     } else if (state->req.getMethod() == GET)
-        state->contentLength = 0;
+      state->contentLength = 0;
   } else {
     state->contentLength = std::strtol(CL->second.c_str(), NULL, 10);
     if (errno == ERANGE) {
-      handle_error_response(*state, 400, "Bad request.\nThe Content-Length is invalid.", server);
-      return;
+      return handle_error(*state, BAD_REQUEST, INVALID_CONTENT_LENGTH, server);
     }
   }
 }
 
-void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
+void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd,
+                  Server &server) {
   if (!(pfd.revents & POLLIN))
     return;
 
@@ -61,12 +63,12 @@ void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd,
     state->req = Request(state->request_buff);
   }
 
-  if (rc < BUFFER_SIZE - 1 || state->contentLength == state->req.getBody().size()) {
+  if (rc < BUFFER_SIZE - 1 ||
+      state->contentLength == state->req.getBody().size()) {
     int status_code = state->req.checkRequest();
-    if (status_code != 200) {
-      handle_error_response(*state, status_code, "Bad request.\nThe request format is not valid.", server);
-      return;
-    }
-	  handle_request(*state, server);
+    if (status_code != 200)
+      return handle_error(*state, status_code, INVALID_REQUEST_FORMAT, server);
+
+    handle_request(*state, server);
   }
 }

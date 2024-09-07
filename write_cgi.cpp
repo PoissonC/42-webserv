@@ -12,26 +12,28 @@
 
 #include "MiddleStages.hpp"
 #include "Server_helper.hpp"
+#include "constants.hpp"
+#include "handle_error.hpp"
 #include "handle_stages.hpp"
-#include "handle_error_response.hpp"
 
-void write_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd, Server & server) {
+void write_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd,
+               Server &server) {
   if (!(pfd.revents & POLLOUT))
     return;
   if (state->cgi_pipe_w[1] != pfd.fd) {
-    std::cout << "Conn fd: " << state->conn_fd << ", pipew: " << state->cgi_pipe_w[1] << ", pfd: " << pfd.fd << std::endl;
+    std::cout << "Conn fd: " << state->conn_fd
+              << ", pipew: " << state->cgi_pipe_w[1] << ", pfd: " << pfd.fd
+              << std::endl;
     throw std::runtime_error("Control Flow is Wrong\n");
     return;
   }
 
-  
   ssize_t wc = write(pfd.fd, state->cgi_buff.c_str() + state->bytes_sent,
-                    state->cgi_buff.size() - state->bytes_sent);
+                     state->cgi_buff.size() - state->bytes_sent);
 
-  if (wc < 0) {
-    handle_error_response(*state, 500, "Failed to send data to CGI", server);
-    return;
-  }
+  if (wc < 0)
+    return handle_error(*state, INTERNAL_SERVER_ERROR, CGI_DATA_SEND_FAILURE,
+                        server);
 
   if (wc == (long)state->cgi_buff.size() - state->bytes_sent) {
     close(state->cgi_pipe_w[1]);

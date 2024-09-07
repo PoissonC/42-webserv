@@ -11,7 +11,7 @@ private:
   std::string _statusMessage;
   std::map<std::string, std::string> _headers;
   std::string _body;
-  std::map< int, std::string > _statusMessages;
+  std::map<int, std::string> _statusMessages;
 
 public:
   Response();
@@ -19,7 +19,6 @@ public:
 
   // @defgroup setters
   void setStatusCode(int code);
-  void setStatusMessage(const int code);
   void setHeader(const std::string &key, const std::string &value);
   void setBody(const std::string &responseBody);
 
@@ -31,7 +30,6 @@ public:
 
   // @defgroup member functions
   std::string generateResponseString() const;
-
 };
 
 #endif // RESPONSE_HPP
