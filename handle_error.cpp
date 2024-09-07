@@ -17,8 +17,6 @@
 std::string getMimeType(const std::string &fileName);
 
 int getStatusCode() {
-  int statusCode;
-
   switch (errno) {
   case EACCES: // Permission denied
   case EROFS:  // Read-only file system

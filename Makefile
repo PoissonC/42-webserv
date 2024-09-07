@@ -1,6 +1,6 @@
 # Compiler and flags
 CC 			= c++ -g
-CFLAGS 		= -std=c++98 #-Wall -Wextra -Werror -fsanitize=address
+CFLAGS 		= -std=c++98 -Wall -Wextra -Werror #-fsanitize=address
 
 # Directories
 UTILS_DIR	= utils/
