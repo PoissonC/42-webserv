@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 12:34:34 by yu                #+#    #+#             */
-/*   Updated: 2024/09/07 18:09:33 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/08 18:46:00 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,8 +104,6 @@ void LocationConfig::setClientBodyBufferSize(const std::vector< std::string > &t
 		if (isdigit(tokens[pos][i])) {
 			_client_body_buffer_size *= 10;
 			_client_body_buffer_size += tokens[pos][i] - '0';
-			if (_client_body_buffer_size < 0)
-				throw std::runtime_error("Invalid client_body_buffer_size");
 			i++;
 		}
 		else

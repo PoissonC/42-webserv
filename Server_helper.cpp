@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 21:32:14 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/27 16:40:17 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/07 22:19:35 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void poll_to_out(int fd, Server & server) {
     return;
   }
   // else
-  next_pfd->events = POLLOUT | POLLHUP | POLLERR;
+  next_pfd->events = POLLOUT;
 }
 
 void poll_to_in(int fd, Server & server) {
@@ -40,7 +40,7 @@ void poll_to_in(int fd, Server & server) {
     return;
   }
   // else
-  next_pfd->events = POLLIN | POLLHUP | POLLERR;
+  next_pfd->events = POLLIN;
 }
 
 void wait_to_save_file(State &state, Server & server) {

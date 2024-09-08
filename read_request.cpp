@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:29 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/07 18:36:34 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/08 18:30:40 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ class Server;
 #include "constants.hpp"
 #include "handle_error.hpp"
 
-static void finishReadingHeaders(std::vector<State>::iterator &state,
+static void finishReadingHeaders(std::list<State>::iterator &state,
                                  Server &server) {
   // std::cout << "Finished reading headers." << std::endl;
   state->req = Request(state->request_buff);
@@ -39,7 +39,7 @@ static void finishReadingHeaders(std::vector<State>::iterator &state,
     return handle_error(*state, BAD_REQUEST, CONTENT_LENGTH_TOO_LARGE, server);
 }
 
-void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd,
+void read_request(std::list<State>::iterator &state, const struct pollfd &pfd,
                   Server &server) {
   if (!(pfd.revents & POLLIN))
     return;
@@ -50,8 +50,8 @@ void read_request(std::vector<State>::iterator &state, const struct pollfd &pfd,
 
   // < 0 ..> an error occurs, = 0 client closes the connection
   if (rc <= 0) {
-    std::cout << "close connection from read_request." << std::endl;
-    server.close_conn(state->conn_fd, state);
+    // std::cerr << "close connection from read_request." << state->event_ct << std::endl;
+    server.close_conn(state);
     return;
   }
 

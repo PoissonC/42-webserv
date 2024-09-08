@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/07 19:11:42 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/08 15:27:11 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include "constants.hpp"
 #include "handle_error.hpp"
 
-void save_file(std::vector<State>::iterator &state, const struct pollfd &pfd,
+void save_file(std::list<State>::iterator &state, const struct pollfd &pfd,
                Server &server) {
   if (!(pfd.revents & POLLOUT))
     return;

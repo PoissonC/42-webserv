@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:05:27 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/28 18:57:42 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/08 18:06:20 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,10 @@ bool Server::_constructed = false;
 void Server::run_a_server(std::vector<Settings>::iterator &it) {
   int new_socket_fd;
 #ifdef __linux__
-  new_socket_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+  // new_socket_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+  new_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (fcntl(new_socket_fd, F_SETFL, O_NONBLOCK) == -1)
+   throw std::runtime_error(strerror(errno));
   // For Linux, set the socket to non-blocking at the time of creation
   if (new_socket_fd < 0) {
     throw std::runtime_error(strerror(errno));
@@ -80,7 +83,6 @@ void Server::new_conns(int sock_fd) {
   while ((new_sd = accept(sock_fd, (sockaddr *)&addr_client,
                           &client_addr_len)) != -1) {
     add_to_poll_in(new_sd);
-
     _states.push_back(
         State(new_sd, ntohl(addr_client.sin_addr.s_addr), sock_fd));
   }
@@ -91,8 +93,8 @@ bool Server::is_socket(int fd) {
            _socks_fd.end());
 }
 
-std::vector<State>::iterator Server::getState(int fd) {
-  for (std::vector<State>::iterator it = _states.begin(); it != _states.end();
+std::list<State>::iterator Server::getState(int fd) {
+  for (std::list<State>::iterator it = _states.begin(); it != _states.end();
        it++) {
     if (it->conn_fd == fd || it->file_fd == fd || it->cgi_pipe_w[1] == fd ||
         it->cgi_pipe_r[0] == fd)
@@ -101,10 +103,27 @@ std::vector<State>::iterator Server::getState(int fd) {
   return _states.end();
 }
 
+void Server::checkTimeoutConn() {
+  bool isDelete = true;
+  while(isDelete) {
+    isDelete = false;
+    for (std::list<State>::iterator it = _states.begin(); it != _states.end(); it++) {
+      if (std::time(NULL) - it->timeEvent > EVENT_TIMEOUT) {
+      std::cerr << "Close conn by checkTimeout" << std::endl;
+        close_conn(it);
+        isDelete = true;
+        break;
+      }
+    }
+  }
+  _cur_poll_fds = _next_poll_fds;
+}
+
+
 void Server::checkTimeoutCGI() {
   for (std::vector<struct pollfd>::iterator it = _cur_poll_fds.begin();
        it != _cur_poll_fds.end(); it++) {
-    std::vector<State>::iterator cur_state = getState(it->fd);
+    std::list<State>::iterator cur_state = getState(it->fd);
     if (cur_state == _states.end())
       continue;
     if (!cur_state->isCGIrunning)
@@ -112,6 +131,7 @@ void Server::checkTimeoutCGI() {
     if (std::time(NULL) - cur_state->timeCGI > CGI_TIMEOUT) {
       if (cur_state->cgiPID > 0)
         kill(cur_state->cgiPID, SIGKILL);
+      cur_state->isCGIrunning = false;
       handle_error(*cur_state, UNDEFINED, TIMEOUT_ERROR, *this);
     }
   }

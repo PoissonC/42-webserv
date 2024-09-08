@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/07 18:06:32 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/08 16:37:08 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ void handle_save_file(State &state, Server &server) {
 }
 
 void handle_delete_file(State &state, Server &server) {
-  if (remove(state.file_path.c_str()) < 0)
+  if (std::remove(state.file_path.c_str()) < 0)
     return handle_error(state, UNDEFINED, DELETE_FILE_FAILURE, server);
 
   wait_to_send_resonpse(state, server);

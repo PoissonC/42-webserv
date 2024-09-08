@@ -27,6 +27,7 @@
 #define CGI_EXECUTION_FAILURE "Failed to execute CGI"
 
 #define READ_CGI_OUTPUT_FAILURE "Failed to read CGI output"
+#define WRONG_FORMAT_CGI_OUTPUT "CGI output parsing failed"
 
 #define TIMEOUT_ERROR "Timeout error"
 

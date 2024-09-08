@@ -38,3 +38,6 @@ webserv
 *.out
 *.app
 webserv
+
+# log files
+*.log

@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/08/28 19:21:49 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/08 18:18:29 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include "ServerConfig.hpp"
 #include <stdint.h>
 #include <ctime>
+#include <list>
 
 class State {
 public:
@@ -49,12 +50,16 @@ public:
 
   int cgi_pipe_r[2], cgi_pipe_w[2];
   int sock_fd, conn_fd, file_fd;
-  void (*stage)(std::vector<State>::iterator &, const struct pollfd &, Server &);
+  void (*stage)(std::list<State>::iterator &, const struct pollfd &, Server &);
 
 
   ServerConfig  server;
   LocationConfig  loc;
 
   std::time_t timeCGI;
+  std::time_t timeEvent;
   bool        isCGIrunning;
+
+  // for debug:
+  unsigned int event_ct;
 };

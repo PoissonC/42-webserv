@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/07 19:24:36 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/08 15:26:52 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ int populateResFromCgiOutput(State &state) {
   return SUCCESS;
 }
 
-void read_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd,
+void read_cgi(std::list<State>::iterator &state, const struct pollfd &pfd,
               Server &server) {
   if (!(pfd.revents & (POLLIN | POLLHUP)))
     return;
@@ -100,7 +100,7 @@ void read_cgi(std::vector<State>::iterator &state, const struct pollfd &pfd,
     server.remove_from_poll(state->cgi_pipe_r[0]);
     if (populateResFromCgiOutput(*state) == FAILURE) {
       return handle_error(*state, INTERNAL_SERVER_ERROR,
-                          READ_CGI_OUTPUT_FAILURE, server);
+                          WRONG_FORMAT_CGI_OUTPUT, server);
     }
 
     state->response_buff = state->res.generateResponseString();

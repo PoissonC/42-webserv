@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:08:17 by ychen2            #+#    #+#             */
-/*   Updated: 2024/08/28 17:45:45 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/08 18:19:40 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ std::vector<struct pollfd>::iterator Server::getNextPfdsEnd() {
 void Server::add_to_poll_in(int fd) {
   struct pollfd new_pfd;
   bzero(&new_pfd, sizeof(struct pollfd));
-  new_pfd.events = POLLIN | POLLHUP | POLLERR;
+  new_pfd.events = POLLIN;
   new_pfd.fd = fd;
   _next_poll_fds.push_back(new_pfd);
 }
@@ -30,21 +30,34 @@ void Server::add_to_poll_in(int fd) {
 void Server::add_to_poll_out(int fd) {
   struct pollfd new_pfd;
   bzero(&new_pfd, sizeof(struct pollfd));
-  new_pfd.events = POLLOUT | POLLHUP | POLLERR;
+  new_pfd.events = POLLOUT;
   new_pfd.fd = fd;
   _next_poll_fds.push_back(new_pfd);
 }
 
-void Server::close_conn(int fd, std::vector<State>::iterator &cur_state) {
-  if (close(fd))
-    return;
-  for (std::vector<struct pollfd>::iterator it = _next_poll_fds.begin();
-       it != _next_poll_fds.end(); it++) {
-    if (it->fd == fd) {
-      _next_poll_fds.erase(it);
-      break;
-    }
-  }
+void Server::close_conn(std::list<State>::iterator &cur_state) {
+  if (cur_state->conn_fd != 0)
+    close(cur_state->conn_fd);
+  if (cur_state->file_fd != 0)
+    close(cur_state->file_fd);
+  if (cur_state->cgi_pipe_r[0] != 0)
+    close(cur_state->cgi_pipe_r[0]);
+  if (cur_state->cgi_pipe_w[1] != 0)
+    close(cur_state->cgi_pipe_w[1]);
+  std::vector<struct pollfd>::iterator it;
+  it = find_it_in_nxt(cur_state->conn_fd);
+  if (it != _next_poll_fds.end())
+    _next_poll_fds.erase(it);
+  it = find_it_in_nxt(cur_state->file_fd);
+  if (it != _next_poll_fds.end())
+    _next_poll_fds.erase(it);
+  it = find_it_in_nxt(cur_state->cgi_pipe_r[0]);
+  if (it != _next_poll_fds.end())
+    _next_poll_fds.erase(it);
+  it = find_it_in_nxt(cur_state->cgi_pipe_w[1]);
+  if (it != _next_poll_fds.end())
+    _next_poll_fds.erase(it);
+
   // This should destroy the cur_state element (free resources, ChatGPT says so)
   _states.erase(cur_state);
 }
@@ -116,7 +129,19 @@ void Server::run() {
   while (1) {
     _cur_poll_fds = _next_poll_fds;
     checkTimeoutCGI();
+    checkTimeoutConn();
     int nfds = poll(_cur_poll_fds.data(), _cur_poll_fds.size(), SERVER_TIMEOUT);
+    //   std::cout << "nfds: " << nfds << "\nfds:" << std::endl;
+    // for (size_t i = 0; i < _cur_poll_fds.size(); i++) {
+    //   std::cout << _cur_poll_fds[i].fd << ", ";
+    // }
+    // std::cout  << std::endl;
+    // if (nfds == 0) {
+    //   std::cout << "Polling arrary size: " << _cur_poll_fds.size() << std::endl;
+    //   std::cout << "State arrary size: " << _states.size() << std::endl;
+    // }
+    // else
+    //   std::cout << "nfds: " << nfds << std::endl;
     if (nfds == -1)
       throw std::runtime_error(strerror(errno));
 
@@ -132,15 +157,23 @@ void Server::run() {
 
       // If the event is not in _socks_fd, handle 5 stages
       else {
-        std::vector<State>::iterator cur_state = getState(it->fd);
+        std::list<State>::iterator cur_state = getState(it->fd);
 
-        if (cur_state == _states.end())
+        if (cur_state == _states.end()) {
+          std::cerr << "Fd: " << it->fd << std::endl;
           throw std::runtime_error(STATE_NOT_FOUND);
-
+        }
+        if (it->revents & POLLNVAL) {
+      std::cerr << "Close conn by invald fd in poll: " << cur_state->event_ct << std::endl;
+          close_conn(cur_state);
+          continue;
+        }
         if (it->revents & (POLLHUP | POLLERR)) {
           // Close connection on error (http/1.1 keeps the connection)
-          if (it->fd == cur_state->conn_fd)
-            close_conn(it->fd, cur_state);
+          if (it->fd == cur_state->conn_fd) {
+      std::cerr << "Close conn by hup/err" << std::endl;
+            close_conn(cur_state);
+          }
           else if (it->fd == cur_state->file_fd)
             handle_error(*cur_state, UNDEFINED, READ_FILE_FAILURE, *this);
           else if (it->revents & (POLLHUP)) {
@@ -149,7 +182,18 @@ void Server::run() {
             handle_error(*cur_state, UNDEFINED, READ_CGI_FAILURE, *this);
           continue;
         }
-
+        // std::cout << "Event triggered fd: " << it->fd << std::endl;
+        // std::cout << it->revents << std::endl;
+        // if (it->revents & POLLIN)
+        //   std::cout << "POLLIN" << std::endl;
+        // if (it->revents & POLLOUT)
+        //   std::cout << "POLLOUT" << std::endl;
+        // if (it->revents & POLLERR)
+        //   std::cout << "POLL_ERR" << std::endl;
+        // if (it->revents & POLLHUP)
+        //   std::cout << "POLLHUP" << std::endl;
+        cur_state->timeEvent = std::time(NULL);
+        cur_state->event_ct++;
         cur_state->stage(cur_state, *it, *this);
       }
     }
