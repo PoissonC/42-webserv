@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:05:27 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/08 20:52:59 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/08 21:20:08 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,12 +79,11 @@ void Server::new_conns(int sock_fd) {
   // Accept new connections
   struct sockaddr_in addr_client;
   socklen_t client_addr_len = sizeof(addr_client);
-  while ((new_sd = accept(sock_fd, (sockaddr *)&addr_client,
-                          &client_addr_len)) != -1) {
-    add_to_poll_in(new_sd);
-    _states.push_back(
-        State(new_sd, ntohl(addr_client.sin_addr.s_addr), sock_fd));
-  }
+  if ((new_sd = accept(sock_fd, (sockaddr *)&addr_client, &client_addr_len)) < 0)
+    throw std::runtime_error("Poll doesn't work.");
+  add_to_poll_in(new_sd);
+  _states.push_back(
+      State(new_sd, ntohl(addr_client.sin_addr.s_addr), sock_fd));
 }
 
 bool Server::is_socket(int fd) {
