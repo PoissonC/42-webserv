@@ -11,18 +11,17 @@
 
 class State;
 
-enum e_cookie
-{
-	NO_COOKIE = 0,
-	COOKIE_1 = 1,
-	COOKIE_2 = 2,
-	COOKIE_3 = 3,
-	COOKIE_4 = 4,
-	COOKIE_5 = 5,
-	COOKIE_6 = 6,
-	COOKIE_7 = 7,
-	COOKIE_8 = 8,
-	WRONG_COOKIE = 9
+enum e_cookie {
+  NO_COOKIE = 0,
+  COOKIE_1 = 1,
+  COOKIE_2 = 2,
+  COOKIE_3 = 3,
+  COOKIE_4 = 4,
+  COOKIE_5 = 5,
+  COOKIE_6 = 6,
+  COOKIE_7 = 7,
+  COOKIE_8 = 8,
+  WRONG_COOKIE = 9
 };
 
 struct uriComponents {
@@ -48,9 +47,9 @@ public:
   uriComponents getUriComponents() const;
   int getCookie() const;
 
-  void setEnvCGI(State & state, char ** env);
-  char ** getEnvCGI() const;
-
+  void setEnvCGI(State &state, char **env);
+  char **getEnvCGI() const;
+  std::string createCookie();
 
 private:
   std::string _req;
@@ -72,7 +71,6 @@ private:
   static void _parseHeaders(std::string line,
                             std::map<std::string, std::string> &headers);
   static void _parseUri(std::string uri, uriComponents &uriComponents);
-  std::string createCookie();
 };
 
 #endif // REQUEST_HPP

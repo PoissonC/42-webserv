@@ -54,13 +54,13 @@ void Request::parse() {
   }
   this->_body = bodyStream.str();
   _findCookie(this->_headers);
-// TESTER COOKIE
-//  if (getHeaders().find("Cookie") == getHeaders().end())
-// 	std::cerr << "No cookie" << std::endl;
-//  else
-// 	std::cerr << getHeaders().find("Cookie")->second << std::endl;
-//  std::cerr << "Cookie: " << this->_cookie << std::endl;
-//  std::cerr << createCookie() << std::endl;
+  // TESTER COOKIE
+  //  if (getHeaders().find("Cookie") == getHeaders().end())
+  // 	std::cerr << "No cookie" << std::endl;
+  //  else
+  // 	std::cerr << getHeaders().find("Cookie")->second << std::endl;
+  //  std::cerr << "Cookie: " << this->_cookie << std::endl;
+  //  std::cerr << createCookie() << std::endl;
 }
 
 void Request::_parseLineReq(std::string line, std::string &method,
@@ -149,7 +149,8 @@ int Request::checkRequest() {
     return (400);
   if (this->_headers.find("Host") == this->_headers.end())
     return (400);
-  std::map<std::string, std::string>::iterator CL = _headers.find("Content-Length");
+  std::map<std::string, std::string>::iterator CL =
+      _headers.find("Content-Length");
   if (CL != this->_headers.end()) {
     std::strtol(CL->second.c_str(), NULL, 10);
     if (errno == ERANGE) {
@@ -201,46 +202,46 @@ uriComponents Request::getUriComponents() const {
   return (this->_uriComponents);
 }
 
-void Request::setEnvCGI(State & state, char ** env) {
-
+void Request::setEnvCGI(State &state, char **env) {
   while (*env) {
-	_envCGI.push_back(*env);
-	env++;
+    _envCGI.push_back(*env);
+    env++;
   }
 
-	_envCGI.push_back("GATEWAY_INTERFACE=CGI/1.1");
-	_envCGI.push_back("SERVER_PROTOCOL=HTTP/1.1");
-	_envCGI.push_back("SERVER_SOFTWARE=MyC++Server/1.0");
-	_envCGI.push_back("REDIRECT_STATUS=200");
-	if (!_method.empty())
-		_envCGI.push_back("REQUEST_METHOD=" + _method);
-	if (!_uri.empty())
-		_envCGI.push_back("REQUEST_URI=" + _uri);
-	if (!_uriComponents.host.empty())
-		_envCGI.push_back("SERVER_NAME=" + _uriComponents.host);
-	if (!_uriComponents.port.empty())
-		_envCGI.push_back("SERVER_PORT=" + _uriComponents.port);
-	if (!_uri.empty())
-		_envCGI.push_back("QUERY_STRING=" + _uriComponents.query);
-	if (!_uriComponents.path.empty())
-		_envCGI.push_back("SCRIPT_NAME=" + _uriComponents.path);
-	if (!_headers.find("Host")->second.empty())
-		_envCGI.push_back("HTTP_HOST=" + _headers.find("Host")->second);
-	if (_headers.find("Content-Type") != _headers.end())
-		_envCGI.push_back("CONTENT_TYPE=" + _headers.find("Content-Type")->second);
-	if (_headers.find("Content-Length") != _headers.end() && _method != "GET")
-		_envCGI.push_back("CONTENT_LENGTH=" + _headers.find("Content-Length")->second);
-	_envCGI.push_back("PATH_INFO=" + state.cgi_path);
-	_envCGI.push_back("SCRIPT_FILENAME=" + state.cgi_path);
-	_envCGI.push_back("DOCUMENT_ROOT=" + state.cgi_path);
-	_envCGI.push_back("REMOTE_ADDR=" + state.client_ip_str);
+  _envCGI.push_back("GATEWAY_INTERFACE=CGI/1.1");
+  _envCGI.push_back("SERVER_PROTOCOL=HTTP/1.1");
+  _envCGI.push_back("SERVER_SOFTWARE=MyC++Server/1.0");
+  _envCGI.push_back("REDIRECT_STATUS=200");
+  if (!_method.empty())
+    _envCGI.push_back("REQUEST_METHOD=" + _method);
+  if (!_uri.empty())
+    _envCGI.push_back("REQUEST_URI=" + _uri);
+  if (!_uriComponents.host.empty())
+    _envCGI.push_back("SERVER_NAME=" + _uriComponents.host);
+  if (!_uriComponents.port.empty())
+    _envCGI.push_back("SERVER_PORT=" + _uriComponents.port);
+  if (!_uri.empty())
+    _envCGI.push_back("QUERY_STRING=" + _uriComponents.query);
+  if (!_uriComponents.path.empty())
+    _envCGI.push_back("SCRIPT_NAME=" + _uriComponents.path);
+  if (!_headers.find("Host")->second.empty())
+    _envCGI.push_back("HTTP_HOST=" + _headers.find("Host")->second);
+  if (_headers.find("Content-Type") != _headers.end())
+    _envCGI.push_back("CONTENT_TYPE=" + _headers.find("Content-Type")->second);
+  if (_headers.find("Content-Length") != _headers.end() && _method != "GET")
+    _envCGI.push_back("CONTENT_LENGTH=" +
+                      _headers.find("Content-Length")->second);
+  _envCGI.push_back("PATH_INFO=" + state.cgi_path);
+  _envCGI.push_back("SCRIPT_FILENAME=" + state.cgi_path);
+  _envCGI.push_back("DOCUMENT_ROOT=" + state.cgi_path);
+  _envCGI.push_back("REMOTE_ADDR=" + state.client_ip_str);
 }
 
-char ** Request::getEnvCGI() const {
+char **Request::getEnvCGI() const {
 
   char **envCGIChar = new char *[_envCGI.size() + 1];
   for (size_t i = 0; i < _envCGI.size(); i++) {
-	envCGIChar[i] = strdup(_envCGI[i].c_str());
+    envCGIChar[i] = strdup(_envCGI[i].c_str());
   }
   envCGIChar[_envCGI.size()] = NULL;
 
@@ -250,42 +251,49 @@ char ** Request::getEnvCGI() const {
 void Request::_findCookie(std::map<std::string, std::string> headers) {
   std::string cookie;
   if (headers.find("Cookie") != headers.end()) {
-	cookie = headers.find("Cookie")->second;
+    cookie = headers.find("Cookie")->second;
   } else
-	cookie = "";
+    cookie = "";
   _cookie = _verifyCookie(cookie);
 }
 
 int Request::_verifyCookie(const std::string cookie) {
-  int cookieValue;
   if (cookie.empty())
-	return NO_COOKIE;
-  try {
-	cookieValue = std::strtol(cookie.c_str(), NULL, 10);
-  } catch (std::exception &e) {
-	return WRONG_COOKIE;
-  }
+    return NO_COOKIE;
+
+  size_t delimiterPos = cookie.find('=');
+  if (delimiterPos == std::string::npos || delimiterPos == cookie.length() - 1)
+    return WRONG_COOKIE;
+
+  std::string valueStr = cookie.substr(delimiterPos + 1);
+
+  char *end;
+  long cookieValue = std::strtol(valueStr.c_str(), &end, 10);
+
+  if (*end != '\0')
+    return WRONG_COOKIE;
+
+  // Check the value range
   if (cookieValue < NO_COOKIE || cookieValue >= WRONG_COOKIE)
-	return WRONG_COOKIE;
-  else
-	return cookieValue;
+    return WRONG_COOKIE;
+
+  return static_cast<int>(cookieValue);
 }
 
 int Request::getCookie() const { return (this->_cookie); }
 
-std::string Request::createCookie()
-{
+std::string Request::createCookie() {
   std::stringstream cookie;
   cookie << "Cookie=";
   if (_cookie == NO_COOKIE)
-	cookie << "1";
+    cookie << "1";
   else if (_cookie == COOKIE_8)
-	cookie << COOKIE_8;
+    cookie << COOKIE_8;
   else if (_cookie < WRONG_COOKIE)
-	cookie << _cookie + 1;
+    cookie << _cookie + 1;
   else {
     return "";
   }
-	cookie << "; Secure; HttpOnly; SameSite=Strict";
-	return cookie.str();
+  cookie << "; Secure; HttpOnly; SameSite=Strict";
+  return cookie.str();
 }

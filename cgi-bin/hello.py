@@ -9,6 +9,29 @@
 # hello, it's python cgi
 
 
+x = input()
+print("Content-Type text/html\r\n\r\n")
+print("hello, it's python cgi")
+print(x)
+
+# HTTP/1.1 500 Internal Server Error
+# Content-Type: text/html
+#
+# hello, it's python cgi
+
+
+# x = input()
+# print("Status: -70\r\n")
+# print("Content-Type: text/html\r\n\r\n")
+# print("hello, it's python cgi")
+# print(x)
+
+# HTTP/1.1 500 Internal Server Error
+# Content-Type: text/html
+#
+# hello, it's python cgi
+
+
 # x = input()
 # print("Status: 500\r\n")
 # print("Content-Type: text/html\r\n\r\n")
@@ -21,11 +44,11 @@
 # hello, it's python cgi
 
 
-x = input()
-print("Status: 200 OK\r\n")
-print("Content-Type: text/html\r\n")
-print("hello, it's python cgi")  # Missing \r\n\r\n here
-print(x)
+# x = input()
+# print("Status: 200\r\n")
+# print("Content-Type: text/html\r\n")
+# print("hello, it's python cgi")  # Missing \r\n\r\n here
+# print(x)
 
 # HTTP/1.1 500 Internal Server Error
 # Content-Type: text/plain

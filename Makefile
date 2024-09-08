@@ -14,7 +14,7 @@ SRC 		= main.cpp ServerPrivateMemberFuncs.cpp ServerPublicMemberFuncs.cpp Server
 				read_request.cpp send_response.cpp read_file.cpp read_cgi.cpp save_file.cpp write_cgi.cpp\
 				handle_error.cpp
 SRC			+= $(addprefix $(UTILS_DIR), getStatusMessageFromCode.cpp HtmlMarkup.cpp normalizeDirectoryPath.cpp)
-SRC			+= $(addprefix $(PAGES_DIR), getIndexPage.cpp getDirectoryPage.cpp getErrorPage.cpp)
+SRC			+= $(addprefix $(PAGES_DIR), getIndexPage.cpp getDirectoryPage.cpp getErrorPage.cpp getHeaderContent.cpp)
 OBJ 		= $(addprefix $(OBJ_DIR), $(SRC:%.cpp=%.o))
 HDR 		= constants.hpp Server.hpp Server_helper.hpp Settings.hpp State.hpp ServerConfig.hpp helper.hpp\
 				LocationConfig.hpp parser.hpp Request.hpp Response.hpp MiddleStages.hpp handle_error.hpp

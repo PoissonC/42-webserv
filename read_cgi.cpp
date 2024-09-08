@@ -24,6 +24,13 @@ bool isValidStatusCode(std::string statusCodeString) {
     if (!std::isdigit(statusCodeString[i]))
       return false;
   }
+
+  char *end;
+  long statusCode = std::strtol(statusCodeString.c_str(), &end, 10);
+
+  if (end == statusCodeString.c_str() || statusCode > 599)
+    return false;
+
   return true;
 }
 
@@ -48,7 +55,10 @@ int populateResFromCgiOutput(State &state) {
       headerLine.resize(headerLine.size() - 1); // Remove trailing '\r'
 
     size_t delimiterPos = headerLine.find(": ");
-    if (delimiterPos != std::string::npos) {
+
+    if (delimiterPos == std::string::npos) {
+      return FAILURE;
+    } else {
       std::string key = headerLine.substr(0, delimiterPos);
       std::string value = headerLine.substr(delimiterPos + 2);
 
