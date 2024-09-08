@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 16:05:27 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/08 18:06:20 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/08 20:52:59 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,8 @@ void Server::run_a_server(std::vector<Settings>::iterator &it) {
   int new_socket_fd;
 #ifdef __linux__
   // new_socket_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
-  new_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-  if (fcntl(new_socket_fd, F_SETFL, O_NONBLOCK) == -1)
-   throw std::runtime_error(strerror(errno));
+  new_socket_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+
   // For Linux, set the socket to non-blocking at the time of creation
   if (new_socket_fd < 0) {
     throw std::runtime_error(strerror(errno));
