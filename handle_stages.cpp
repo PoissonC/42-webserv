@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/08 16:37:08 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/08 19:04:15 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,9 +148,12 @@ bool exe_cgi(State &state, Server &server) {
   }
   state.timeCGI = std::time(NULL);
   state.isCGIrunning = true;
-  if (state.cgi_pipe_w[0] != 0)
+  if (state.cgi_pipe_w[0] != 0) {
     close(state.cgi_pipe_w[0]);
+    state.cgi_pipe_w[0] = 0;
+  }
   close(state.cgi_pipe_r[1]);
+  state.cgi_pipe_r[1] = 0;
   return true;
 }
 

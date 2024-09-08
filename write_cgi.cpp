@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/08 15:27:11 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/08 20:31:14 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ void write_cgi(std::list<State>::iterator &state, const struct pollfd &pfd,
 
   if (wc == (long)state->cgi_buff.size() - state->bytes_sent) {
     close(state->cgi_pipe_w[1]);
+    state->cgi_pipe_w[1] = 0;
     state->bytes_sent = 0;
     state->cgi_buff = std::string();
     if (!exe_cgi(*state, server))
