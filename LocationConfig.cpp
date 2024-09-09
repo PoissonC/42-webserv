@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   LocationConfig.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jhurpy <jhurpy@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 12:34:34 by yu                #+#    #+#             */
-/*   Updated: 2024/09/09 20:19:11 by jhurpy           ###   ########.fr       */
+/*   Updated: 2024/09/09 21:49:39 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ LocationConfig::LocationConfig() : _root("./"), _cgi_pass(), _redir(std::make_pa
 	for (int i = 0; i < 3; i++)
 		_allow_methods[i] = false;
 }
-
+#include <iostream>
 void LocationConfig::setAllowMethods(const std::vector< std::string > &tokens, size_t &pos) {
 	while (tokens[pos] != ";" && pos < tokens.size()) {
 		if (tokens[pos] == "GET")
@@ -32,9 +32,6 @@ void LocationConfig::setAllowMethods(const std::vector< std::string > &tokens, s
 	}
 	if (pos == tokens.size())
 		throw std::runtime_error("Expected ';' after 'allow_methods'");
-	if (!_allow_methods[0] && !_allow_methods[1] && !_allow_methods[2]) {
-		_allow_methods[0] = _allow_methods[1] = _allow_methods[2] = true;
-	}
 	pos++;// skip ';'
 }
 
@@ -162,6 +159,11 @@ size_t LocationConfig::getClientBodyBufferSize() const {
 	return _client_body_buffer_size;
 }
 
+void LocationConfig::setAllAllowed() {
+	_allow_methods[0] = _allow_methods[1] = _allow_methods[2] = true;
+}
+
+
 LocationConfig parseLocation(const std::vector< std::string > &tokens, size_t &pos) {
 	LocationConfig location;
 	while (tokens[pos] != "}" && pos < tokens.size()) {
@@ -199,5 +201,7 @@ LocationConfig parseLocation(const std::vector< std::string > &tokens, size_t &p
 	if (pos == tokens.size())
 		throw std::runtime_error("Expected '}' after location block");
 	pos++;// skip '}'
+	if (!location.getAllowMethods(GET) && !location.getAllowMethods(POST) && !location.getAllowMethods(DELETE))
+		location.setAllAllowed();		
 	return location;
 }

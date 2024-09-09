@@ -20,6 +20,13 @@ server {
         allow_methods GET POST DELETE;
     }
 
+    location /cgi-plus {
+        autoindex on;
+        root ./cgi-bin/;
+        cgi_pass more-cgi;
+        allow_methods GET POST DELETE;
+    }
+
 }
 
 server {

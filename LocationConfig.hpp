@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 10:44:50 by yu                #+#    #+#             */
-/*   Updated: 2024/09/07 16:02:55 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/09 21:48:56 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ public:
 
 	void setIndex(const std::vector< std::string > &tokens, size_t &pos);
 	void setAllowMethods(const std::vector< std::string > &tokens, size_t &pos);
+	void setAllAllowed();
 	void setAutoindex(const std::vector< std::string > &tokens, size_t &pos);
 	void setRoot(const std::vector< std::string > &tokens, size_t &pos);
 	void setCgiPass(const std::vector< std::string > &tokens, size_t &pos);
