@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 22:00:02 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/08 17:30:23 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/09 18:55:12 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <utility>
 #include <vector>
 #include <list>
+
 #ifdef __APPLE__
 #include <fcntl.h>
 #endif
@@ -32,7 +33,7 @@
 #define BACK_LOG 32
 #define MAX_EVENTS 16
 #define CGI_TIMEOUT 2
-#define EVENT_TIMEOUT 1
+#define EVENT_TIMEOUT 100
 #define SERVER_TIMEOUT 500
 
 class Server {

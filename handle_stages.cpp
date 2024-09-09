@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   handle_stages.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jhurpy <jhurpy@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/09 16:15:57 by jhurpy           ###   ########.fr       */
+/*   Updated: 2024/09/09 17:33:24 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,13 +65,11 @@ void handle_read_file(State &state, Server &server) {
 }
 
 void handle_save_file(State &state, Server &server) {
-  if (access(state.file_path.c_str(), F_OK) != 0)
-    state.res.setStatusCode(CREATED);
   state.file_fd =
-      open(state.file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+      open(state.file_path.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0644);
   if (state.file_fd < 0)
     return handle_error(state, UNDEFINED, SAVE_FILE_FAILURE, server);
-
+  state.res.setStatusCode(CREATED);
   wait_to_save_file(state, server);
 }
 

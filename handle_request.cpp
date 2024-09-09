@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/23 18:06:50 by jhurpy            #+#    #+#             */
-/*   Updated: 2024/09/07 18:36:14 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/09 17:53:24 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ static bool compare_method(State &state, LocationConfig &location,
   return true;
 }
 
-static LocationConfig &
+LocationConfig &
 compare_location(State &state,
                  std::map<std::string, LocationConfig> &locationMap) {
   std::string path = state.req.getUriComponents().path;
@@ -56,10 +56,6 @@ compare_location(State &state,
 }
 
 void handle_request(State &state, Server &server) {
-  server.getServerConfig(state);
-  std::map<std::string, LocationConfig> location = state.server.getLocations();
-
-  state.loc = compare_location(state, location);
   if (!compare_method(state, state.loc, server))
     return;
   // std::cout << "original_path: " << state.original_path << std::endl;

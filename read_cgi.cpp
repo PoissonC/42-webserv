@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:36 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/08 19:05:26 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/09 18:53:06 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ int populateResFromCgiOutput(State &state) {
   }
 
   if (!isStatusFound)
-    state.res.setStatusCode(200);
+    state.res.setStatusCode(OK);
   state.res.setBody(body);
 
   return SUCCESS;
@@ -92,9 +92,8 @@ void read_cgi(std::list<State>::iterator &state, const struct pollfd &pfd,
   if (!(pfd.revents & (POLLIN | POLLHUP)))
     return;
   char buf[BUFFER_SIZE];
-  bzero(buf, sizeof(buf));
 
-  ssize_t rc = read(state->cgi_pipe_r[0], buf, BUFFER_SIZE - 1);
+  ssize_t rc = read(state->cgi_pipe_r[0], buf, BUFFER_SIZE);
 
   if (rc < 0) {
     close(state->cgi_pipe_r[0]);
@@ -103,10 +102,10 @@ void read_cgi(std::list<State>::iterator &state, const struct pollfd &pfd,
     return handle_error(*state, INTERNAL_SERVER_ERROR, READ_CGI_OUTPUT_FAILURE,
                         server);
   }
-  state->cgi_buff += buf;
+  state->cgi_buff.append(buf, rc);
 
   // end of reading
-  if (rc < BUFFER_SIZE - 1) {
+  if (rc < BUFFER_SIZE) {
     close(state->cgi_pipe_r[0]);
     server.remove_from_poll(state->cgi_pipe_r[0]);
     state->cgi_pipe_r[0] = 0;

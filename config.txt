@@ -11,6 +11,7 @@ server {
         autoindex on;
         root ./files;
         allow_methods GET POST DELETE;
+        client_max_body_size 10m;
     }
 
     location /cgi {

@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:29 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/08 18:30:40 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/09 19:01:49 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,12 @@ class Server;
 static void finishReadingHeaders(std::list<State>::iterator &state,
                                  Server &server) {
   // std::cout << "Finished reading headers." << std::endl;
+
   state->req = Request(state->request_buff);
+  server.getServerConfig(*state);
+  std::map<std::string, LocationConfig> location = state->server.getLocations();
+
+  state->loc = compare_location(*state, location);
   std::map<std::string, std::string> headers = state->req.getHeaders();
   std::map<std::string, std::string>::iterator CL =
       headers.find("Content-Length");
@@ -31,6 +36,8 @@ static void finishReadingHeaders(std::list<State>::iterator &state,
                state->req.getMethod() == DELETE)
       state->contentLength = 0;
   } else {
+    if (state->req.getMethod() == GET || state->req.getMethod() == DELETE)
+      return handle_error(*state, BAD_REQUEST, EXTRA_CONTENT_LENGTH, server);
     state->contentLength = std::strtol(CL->second.c_str(), NULL, 10);
     if (errno == ERANGE) {
       return handle_error(*state, BAD_REQUEST, INVALID_CONTENT_LENGTH, server);
@@ -46,8 +53,7 @@ void read_request(std::list<State>::iterator &state, const struct pollfd &pfd,
     return;
 
   char buf[BUFFER_SIZE];
-  bzero(buf, BUFFER_SIZE);
-  ssize_t rc = recv(state->conn_fd, buf, BUFFER_SIZE - 1, MSG_DONTWAIT);
+  ssize_t rc = recv(state->conn_fd, buf, BUFFER_SIZE, MSG_DONTWAIT);
 
   // < 0 ..> an error occurs, = 0 client closes the connection
   if (rc <= 0) {
@@ -57,7 +63,7 @@ void read_request(std::list<State>::iterator &state, const struct pollfd &pfd,
     return;
   }
 
-  state->request_buff += buf;
+  state->request_buff.append(buf, rc);
 
   state->bodyPos = state->request_buff.find("\r\n\r\n");
   if (state->bodyPos != std::string::npos && !state->isFinishHeaders) {
@@ -67,8 +73,7 @@ void read_request(std::list<State>::iterator &state, const struct pollfd &pfd,
     state->req = Request(state->request_buff);
   }
 
-  if (rc < BUFFER_SIZE - 1 ||
-      state->contentLength == state->req.getBody().size()) {
+  if (state->contentLength == state->req.getBody().size()) {
     int status_code = state->req.checkRequest();
     if (status_code != 200) {
       return handle_error(*state, status_code, INVALID_REQUEST_FORMAT, server);
@@ -76,4 +81,5 @@ void read_request(std::list<State>::iterator &state, const struct pollfd &pfd,
 
     handle_request(*state, server);
   }
+
 }
