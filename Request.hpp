@@ -48,7 +48,7 @@ public:
   int getCookie() const;
 
   void setEnvCGI(State &state, char **env);
-  char **getEnvCGI() const;
+  std::vector<char *> getEnvCGI() const;
   std::string createCookie() const;
 
 private:

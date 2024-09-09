@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 14:14:22 by yu                #+#    #+#             */
-/*   Updated: 2024/09/09 21:24:08 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/09 23:13:20 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,11 @@ State::State(int fd, uint32_t client_addr, int socket): isFinishHeaders(false), 
   bzero(cgi_pipe_w, sizeof(cgi_pipe_w));
   std::cout << "New connection fd: " << fd << std::endl;
   timeEvent = std::time(NULL);
-
+  cgi_pipe_r[0] = 0;
+  cgi_pipe_r[1] = 0;
+  cgi_pipe_w[0] = 0;
+  cgi_pipe_w[1] = 0;
+  file_fd = 0;
   // for Debug:
   event_ct = 0;
 }

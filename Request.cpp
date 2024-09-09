@@ -236,15 +236,13 @@ void Request::setEnvCGI(State &state, char **env) {
   _envCGI.push_back("REMOTE_ADDR=" + state.client_ip_str);
 }
 
-char **Request::getEnvCGI() const {
-
-  char **envCGIChar = new char *[_envCGI.size() + 1];
-  for (size_t i = 0; i < _envCGI.size(); i++) {
-    envCGIChar[i] = strdup(_envCGI[i].c_str());
+std::vector<char *> Request::getEnvCGI() const {
+  std::vector<char *> ret;
+  for (std::vector<std::string>::const_iterator it = _envCGI.begin(); it != _envCGI.end(); it++) {
+    ret.push_back(const_cast<char *>(it->c_str()));
   }
-  envCGIChar[_envCGI.size()] = NULL;
-
-  return (envCGIChar);
+  ret.push_back(NULL);
+  return (ret);
 }
 
 void Request::_findCookie(std::map<std::string, std::string> headers) {
