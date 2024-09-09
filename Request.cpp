@@ -139,7 +139,6 @@ void Request::_parseUri(const std::string &uri, uriComponents &uriComponents) {
 }
 
 int Request::checkRequest() {
-  std::cerr << this->_version << std::endl;
   if (this->_method.empty() || this->_uri.empty() || this->_version.empty())
     return (BAD_REQUEST);
   if (this->_method != "GET" && this->_method != "POST" &&
