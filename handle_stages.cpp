@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/09 22:07:07 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/09 23:25:58 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,7 @@ bool exe_cgi(State &state, Server &server) {
     file_path.push_back(const_cast<char *>(state.cgi_path.c_str()));
     file_path.push_back(NULL);
     execve(state.original_path.c_str(), file_path.data(),
-           state.req.getEnvCGI());
+           state.req.getEnvCGI().data());
     throw std::runtime_error(CGI_EXECUTION_FAILURE);
   }
   state.timeCGI = std::time(NULL);

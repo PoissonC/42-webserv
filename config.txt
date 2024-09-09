@@ -3,7 +3,7 @@ server {
     server_name first.com;
 
     location / {
-        autoindex off;
+        autoindex on;
         allow_methods GET;
     }
 
