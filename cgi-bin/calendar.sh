@@ -1,6 +1,6 @@
 #!/bin/bash
 
-printf "HTTP/1.1 200 OK\nContent-Type: text/html\n\n"
+echo "Status: 200 OK\r\nContent-Type: text/html\r\n\r\n"
 
 cat <<EOF
 

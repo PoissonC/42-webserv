@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/09 17:33:24 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/09 22:07:07 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,8 +106,11 @@ static void check_cgi_extension(State &state) {
     programName = "sh";
   else if (extension == ".php")
     programName = "php-cgi";
-  else
-    programName = "bash";
+  else {
+    programName = state.cgi_path;
+    state.original_path = programName;
+    return;
+  }
   state.original_path = find_cgi_path(programName);
 }
 
