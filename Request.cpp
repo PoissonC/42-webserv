@@ -1,5 +1,6 @@
 #include "Request.hpp"
 #include "State.hpp"
+#include "constants.hpp"
 
 Request::Request(const std::string &request) : _req(request) {
   // constructor will initialize the request variable
@@ -20,9 +21,7 @@ Request::Request(const std::string &request) : _req(request) {
   parse();
 }
 
-Request::~Request() {
-  // destructor
-}
+Request::~Request() {}
 
 void Request::parse() {
   std::istringstream iss(this->_req);
@@ -65,11 +64,11 @@ void Request::parse() {
 
 void Request::_parseLineReq(std::string line, std::string &method,
                             std::string &uri, std::string &version) {
-  size_t pos = line.find(" ");
+  size_t pos = line.find(' ');
   if (pos != std::string::npos) {
     method = line.substr(0, pos);
     line.erase(0, pos + 1);
-    pos = line.find(" ");
+    pos = line.find(' ');
     if (pos != std::string::npos) {
       uri = line.substr(0, pos);
       line.erase(0, pos + 1);
@@ -90,10 +89,10 @@ void Request::_parseHeaders(std::string line,
   }
 }
 
-void Request::_parseUri(std::string uri, uriComponents &uriComponents) {
+void Request::_parseUri(const std::string &uri, uriComponents &uriComponents) {
   std::string resource;
   std::string query;
-  size_t pos = uri.find("?");
+  size_t pos = uri.find('?');
   if (pos != std::string::npos) {
     resource = uri.substr(0, pos);
     query = uri.substr(pos + 1);
@@ -107,12 +106,12 @@ void Request::_parseUri(std::string uri, uriComponents &uriComponents) {
     uriComponents.scheme = uriParse.substr(0, pos);
     uriParse.erase(0, pos + 3);
   }
-  pos = uriParse.find(":");
+  pos = uriParse.find(':');
   if (pos != std::string::npos) {
     uriComponents.host = uriParse.substr(0, pos);
     uriParse.erase(0, pos + 1);
   }
-  pos = uriParse.find("/");
+  pos = uriParse.find('/');
   if (pos != std::string::npos) {
     if (uriComponents.host.empty())
       uriComponents.host = uriParse.substr(0, pos);
@@ -129,7 +128,7 @@ void Request::_parseUri(std::string uri, uriComponents &uriComponents) {
     uriComponents.path = "/" + uriParse;
   }
   uriParse = query;
-  pos = uriParse.find("#");
+  pos = uriParse.find('#');
   if (pos != std::string::npos) {
     uriComponents.query = uriParse.substr(0, pos);
     uriParse.erase(0, pos + 1);
@@ -140,7 +139,7 @@ void Request::_parseUri(std::string uri, uriComponents &uriComponents) {
 }
 
 int Request::checkRequest() {
-  if (this->_method == "" || this->_uri == "" || this->_version == "")
+  if (this->_method.empty() || this->_uri.empty() || this->_version.empty())
     return (400);
   if (this->_method != "GET" && this->_method != "POST" &&
       this->_method != "DELETE")
@@ -165,8 +164,8 @@ int Request::checkRequest() {
       hostUri = hostUri.substr(4);
     if (hostHeader.find("www.") == 0)
       hostHeader = hostHeader.substr(4);
-    if (hostHeader.find(":") != std::string::npos)
-      hostHeader = hostHeader.substr(0, hostHeader.find(":"));
+    if (hostHeader.find(':') != std::string::npos)
+      hostHeader = hostHeader.substr(0, hostHeader.find(':'));
     if (hostUri != hostHeader)
       return (400);
   }
@@ -257,7 +256,7 @@ void Request::_findCookie(std::map<std::string, std::string> headers) {
   _cookie = _verifyCookie(cookie);
 }
 
-int Request::_verifyCookie(const std::string cookie) {
+int Request::_verifyCookie(const std::string &cookie) {
   if (cookie.empty())
     return NO_COOKIE;
 
@@ -282,8 +281,9 @@ int Request::_verifyCookie(const std::string cookie) {
 
 int Request::getCookie() const { return (this->_cookie); }
 
-std::string Request::createCookie() {
+std::string Request::createCookie() const {
   std::stringstream cookie;
+
   cookie << "Cookie=";
   if (_cookie == NO_COOKIE)
     cookie << "1";
@@ -294,6 +294,9 @@ std::string Request::createCookie() {
   else {
     return "";
   }
-  cookie << "; Secure; HttpOnly; SameSite=Strict";
+
+  cookie << "; Path=/; Max-Age=" << COOKIE_MAX_AGE
+         << "; Secure; HttpOnly; SameSite=Strict";
+
   return cookie.str();
 }

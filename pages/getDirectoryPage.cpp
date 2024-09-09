@@ -87,7 +87,9 @@ std::string getAddButtonMarkup(HtmlMarkup &directoryPage) {
       << "            var formData = new FormData();\n"
       << "            formData.append('file', file);\n"
       << "            var uploadPath = window.location.pathname;\n"
-      << "            fetch(`${uploadPath}`, {\n"
+      << "            var fileName = encodeURIComponent(file.name);\n"
+      << "            var fullPath = `${uploadPath}/${fileName}`;\n"
+      << "            fetch(fullPath, {\n"
       << "                method: 'POST',\n"
       << "                body: formData\n"
       << "            })\n"
@@ -110,20 +112,52 @@ std::string getAddButtonMarkup(HtmlMarkup &directoryPage) {
       << "    };\n"
       << "});\n";
 
-  // Add the script to the page (no <script> tags needed as they are handled
-  // elsewhere)
   directoryPage.addScript(script.str());
 
   return button;
 }
 
-std::string getDeleteButtonMarkup() {
+std::string getDeleteButtonMarkup(HtmlMarkup &directoryPage,
+                                  std::string &filePath) {
   const std::string deleteIcon = "&#8854;";
   std::string button;
 
-  button += "<button onClick=(alert(\"placeholder_for_deleting_file\"))>";
+  // Use a unique ID based on the file path
+  std::string uniqueButtonId = "deleteButton_" + filePath;
+  std::replace(uniqueButtonId.begin(), uniqueButtonId.end(), '/',
+               '_'); // Replace '/' with '_'
+
+  button += "<button id=\"" + uniqueButtonId + "\">";
   button += deleteIcon;
   button += "</button>";
+
+  std::ostringstream script;
+  script << "document.getElementById('" << uniqueButtonId
+         << "').addEventListener('click', "
+            "function() {\n"
+         << "    console.log('Deleting file: " << filePath << "');\n"
+         << "    if (confirm('Are you sure you want to delete this file?')) {\n"
+         << "        var filePath = '" << filePath << "';\n"
+         << "        fetch(filePath, {\n"
+         << "            method: 'DELETE'\n"
+         << "        })\n"
+         << "        .then(function(response) {\n"
+         << "            if (!response.ok) {\n"
+         << "                throw new Error('Server error, status code: ' + "
+            "response.status);\n"
+         << "            }\n"
+         << "            alert('File deleted successfully');\n"
+         << "            location.reload();\n"
+         << "        })\n"
+         << "        .catch(function(error) {\n"
+         << "            console.error('Error:', error);\n"
+         << "            alert('Failed to delete file: ' + error.message);\n"
+         << "        });\n"
+         << "    }\n"
+         << "});\n";
+
+  directoryPage.addScript(script.str());
+
   return button;
 }
 
@@ -146,8 +180,8 @@ std::string getFolderItemMarkup(const std::string &fullPath,
   return item;
 }
 
-std::string getFileItemMarkup(std::string &fullPath, struct stat path_stat,
-                              const std::string &name) {
+std::string getFileItemMarkup(HtmlMarkup &directoryPage, std::string &fullPath,
+                              struct stat path_stat, const std::string &name) {
   // @defgroup icons
   const std::string fileIcon = "&#10141;";
   const std::string notAvailableFileIcon = "&#10509";
@@ -166,7 +200,7 @@ std::string getFileItemMarkup(std::string &fullPath, struct stat path_stat,
   item += "</div>";
   item += "</a>";
   item += "</div>";
-  item += getDeleteButtonMarkup();
+  item += getDeleteButtonMarkup(directoryPage, fullPath);
   item += "</li>";
   return item;
 }
@@ -245,7 +279,8 @@ std::string getDirectoryPage(State &state) {
       if (S_ISDIR(path_stat.st_mode)) {
         directories.push_back(getFolderItemMarkup(fullPath, path_stat, name));
       } else {
-        files.push_back(getFileItemMarkup(fullPath, path_stat, name));
+        files.push_back(
+            getFileItemMarkup(directoryPage, fullPath, path_stat, name));
       }
     }
     closedir(dir);

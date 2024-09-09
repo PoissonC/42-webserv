@@ -11,7 +11,6 @@ private:
   std::string _statusMessage;
   std::map<std::string, std::string> _headers;
   std::string _body;
-  std::map<int, std::string> _statusMessages;
 
 public:
   Response();

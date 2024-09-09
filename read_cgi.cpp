@@ -69,8 +69,8 @@ int populateResFromCgiOutput(State &state) {
         isStatusFound = true;
         std::string statusCodeString = value.substr(0, 3);
         if (isValidStatusCode(statusCodeString)) {
-          int statusCode = std::strtol(value.substr(0, 3).c_str(), NULL, 10);
-          state.res.setStatusCode(statusCode);
+          long statusCode = std::strtol(value.substr(0, 3).c_str(), NULL, 10);
+          state.res.setStatusCode(static_cast<int>(statusCode));
         } else {
           return FAILURE;
         }

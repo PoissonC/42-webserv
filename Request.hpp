@@ -49,7 +49,7 @@ public:
 
   void setEnvCGI(State &state, char **env);
   char **getEnvCGI() const;
-  std::string createCookie();
+  std::string createCookie() const;
 
 private:
   std::string _req;
@@ -64,13 +64,13 @@ private:
   std::vector<std::string> _envCGI;
 
   void _findCookie(std::map<std::string, std::string> headers);
-  int _verifyCookie(const std::string cookie);
+  static int _verifyCookie(const std::string &cookie);
 
   static void _parseLineReq(std::string line, std::string &method,
                             std::string &uri, std::string &version);
   static void _parseHeaders(std::string line,
                             std::map<std::string, std::string> &headers);
-  static void _parseUri(std::string uri, uriComponents &uriComponents);
+  static void _parseUri(const std::string &uri, uriComponents &uriComponents);
 };
 
 #endif // REQUEST_HPP

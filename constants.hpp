@@ -14,6 +14,9 @@
 #define INSUFFICIENT_STORAGE 507
 #define SERVICE_UNAVAILABLE 503
 
+// @defgroup cookie
+#define COOKIE_MAX_AGE 600
+
 // @defgroup error messages
 #define STATE_NOT_FOUND "State not found"
 #define SERVER_DUPLICATE "Server instance already exists"
