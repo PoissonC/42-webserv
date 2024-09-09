@@ -25,9 +25,10 @@ static void finishReadingHeaders(std::list<State>::iterator &state,
   std::map<std::string, std::string>::iterator CL =
       headers.find("Content-Length");
   if (CL == headers.end()) {
-    if (state->req.getMethod() == POST || state->req.getMethod() == DELETE) {
+    if (state->req.getMethod() == POST) {
       return handle_error(*state, BAD_REQUEST, MISSING_CONTENT_LENGTH, server);
-    } else if (state->req.getMethod() == GET)
+    } else if (state->req.getMethod() == GET ||
+               state->req.getMethod() == DELETE)
       state->contentLength = 0;
   } else {
     state->contentLength = std::strtol(CL->second.c_str(), NULL, 10);
@@ -50,7 +51,8 @@ void read_request(std::list<State>::iterator &state, const struct pollfd &pfd,
 
   // < 0 ..> an error occurs, = 0 client closes the connection
   if (rc <= 0) {
-    // std::cerr << "close connection from read_request." << state->event_ct << std::endl;
+    // std::cerr << "close connection from read_request." << state->event_ct <<
+    // std::endl;
     server.close_conn(state);
     return;
   }
