@@ -139,24 +139,25 @@ void Request::_parseUri(const std::string &uri, uriComponents &uriComponents) {
 }
 
 int Request::checkRequest() {
+  std::cerr << this->_version << std::endl;
   if (this->_method.empty() || this->_uri.empty() || this->_version.empty())
-    return (400);
+    return (BAD_REQUEST);
   if (this->_method != "GET" && this->_method != "POST" &&
       this->_method != "DELETE")
-    return (400);
+    return (METHOD_NOT_ALLOWED);
   if (this->_version != "HTTP/1.1")
-    return (400);
+    return (HTTP_VERSION_NOT_SUPPORTED);
   if (this->_headers.find("Host") == this->_headers.end())
-    return (400);
+    return (BAD_REQUEST);
   std::map<std::string, std::string>::iterator CL =
       _headers.find("Content-Length");
   if (CL != this->_headers.end()) {
     std::strtol(CL->second.c_str(), NULL, 10);
     if (errno == ERANGE) {
-      return (400);
+      return (BAD_REQUEST);
     }
   } else if (_method == "POST")
-    return (400);
+    return (BAD_REQUEST);
   std::string hostUri = this->_uriComponents.host;
   std::string hostHeader = this->_headers["Host"];
   if (!hostUri.empty()) {
@@ -167,13 +168,13 @@ int Request::checkRequest() {
     if (hostHeader.find(':') != std::string::npos)
       hostHeader = hostHeader.substr(0, hostHeader.find(':'));
     if (hostUri != hostHeader)
-      return (400);
+      return (BAD_REQUEST);
   }
   for (unsigned long i = 0; i < _uriComponents.path.size() - 1; i++) {
     if (_uriComponents.path[i] == '/' && _uriComponents.path[i + 1] == '/')
-      return (400);
+      return (BAD_REQUEST);
   }
-  return (200);
+  return (OK);
 }
 
 e_methods Request::getMethod() const {
