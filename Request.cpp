@@ -156,7 +156,7 @@ int Request::checkRequest() {
       return (BAD_REQUEST);
     }
   } else if (_method == "POST")
-    return (BAD_REQUEST);
+    return (LENGTH_REQUIRED);
   std::string hostUri = this->_uriComponents.host;
   std::string hostHeader = this->_headers["Host"];
   if (!hostUri.empty()) {

@@ -12,10 +12,11 @@
 #define BAD_REQUEST 400
 #define FORBIDDEN 403
 #define NOT_FOUND 404
-#define METHOD_NOT_ALLOWED 405 // added in checkRequest
+#define METHOD_NOT_ALLOWED 405
+#define LENGTH_REQUIRED 411
 #define INTERNAL_SERVER_ERROR 500
 #define SERVICE_UNAVAILABLE 503
-#define HTTP_VERSION_NOT_SUPPORTED 505 // added in checkRequest
+#define HTTP_VERSION_NOT_SUPPORTED 505
 #define INSUFFICIENT_STORAGE 507
 
 // @defgroup cookie
