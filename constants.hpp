@@ -7,6 +7,7 @@
 
 // @defgroup status codes
 #define OK 200
+#define CREATED 201
 #define BAD_REQUEST 400
 #define FORBIDDEN 403
 #define NOT_FOUND 404
