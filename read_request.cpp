@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   read_request.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jhurpy <jhurpy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:32:29 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/09 19:01:49 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/09 20:22:08 by jhurpy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ void read_request(std::list<State>::iterator &state, const struct pollfd &pfd,
 
   if (state->contentLength == state->req.getBody().size()) {
     int status_code = state->req.checkRequest();
-    if (status_code != 200) {
+    if (status_code != OK) {
       return handle_error(*state, status_code, INVALID_REQUEST_FORMAT, server);
     }
 

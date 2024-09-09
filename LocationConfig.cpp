@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   LocationConfig.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jhurpy <jhurpy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/19 12:34:34 by yu                #+#    #+#             */
-/*   Updated: 2024/09/08 18:46:00 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/09 20:19:11 by jhurpy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "LocationConfig.hpp"
+#include "constants.hpp"
 
 LocationConfig::LocationConfig() : _root("./"), _cgi_pass(), _redir(std::make_pair(0, "")), _autoindex(false), _client_body_buffer_size(8 * 1024) {
 	for (int i = 0; i < 3; i++)
@@ -64,15 +65,15 @@ void LocationConfig::setCgiPass(const std::vector< std::string > &tokens, size_t
 
 void LocationConfig::setRedir(const std::vector< std::string > &tokens, size_t &pos) {
 	if (tokens[pos] == "301")
-		_redir.first = 301;
+		_redir.first = MOVED_PERMANENTLY;
 	else if (tokens[pos] == "302")
-		_redir.first = 302;
+		_redir.first = FOUND;
 	else if (tokens[pos] == "303")
-		_redir.first = 303;
+		_redir.first = SEE_OTHER;
 	else if (tokens[pos] == "307")
-		_redir.first = 307;
+		_redir.first = TEMPORARY_REDIRECT;
 	else if (tokens[pos] == "308")
-		_redir.first = 308;
+		_redir.first = PERMANENT_REDIRECT;
 	else
 		throw std::runtime_error("Invalid return code");
 	if (pos + 1 == tokens.size() || tokens[pos + 1] == ";")
