@@ -1,6 +1,6 @@
 # Compiler and flags
-CC 			= c++ -g
-CFLAGS 		= -std=c++98 -Wall -Wextra -Werror #-fsanitize=address
+CC 			= c++
+CFLAGS 		= -std=c++98 -Wall -Wextra -Werror
 
 # Directories
 UTILS_DIR	= utils/
@@ -32,10 +32,6 @@ $(NAME): $(OBJ)
 $(OBJ_DIR)%.o: %.cpp $(HDR) Makefile
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -o $@ -c $<
-
-# Linter
-lint:
-	clang-format -i *.cpp *.hpp
 
 # Clean up object files
 clean:
