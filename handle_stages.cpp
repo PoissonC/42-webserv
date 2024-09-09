@@ -6,7 +6,7 @@
 /*   By: jhurpy <jhurpy@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/09 16:06:56 by jhurpy           ###   ########.fr       */
+/*   Updated: 2024/09/09 16:15:57 by jhurpy           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,8 @@ void handle_save_file(State &state, Server &server) {
 void handle_delete_file(State &state, Server &server) {
   if (std::remove(state.file_path.c_str()) < 0)
     return handle_error(state, UNDEFINED, DELETE_FILE_FAILURE, server);
+  if (access(state.file_path.c_str(), F_OK) != 0)
+    state.res.setStatusCode(NO_CONTENT);
 
   wait_to_send_resonpse(state, server);
 }
