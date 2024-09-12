@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 17:17:26 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/09 23:25:58 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/12 17:03:35 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,10 @@
 void handle_read_file(State &state, Server &server) {
   struct stat path_stat;
   stat(state.file_path.c_str(), &path_stat);
+  bool isIndexFileFound = false;
 
   if (S_ISDIR(path_stat.st_mode)) {
     const std::vector<std::string> &indexFiles = state.loc.getIndex();
-    bool isIndexFileFound = false;
 
     for (std::vector<std::string>::const_iterator it = indexFiles.begin();
          it != indexFiles.end(); ++it) {
