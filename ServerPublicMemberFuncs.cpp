@@ -6,7 +6,7 @@
 /*   By: ychen2 <ychen2@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 18:08:17 by ychen2            #+#    #+#             */
-/*   Updated: 2024/09/08 18:19:40 by ychen2           ###   ########.fr       */
+/*   Updated: 2024/09/10 01:02:14 by ychen2           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,17 +131,6 @@ void Server::run() {
     checkTimeoutCGI();
     checkTimeoutConn();
     int nfds = poll(_cur_poll_fds.data(), _cur_poll_fds.size(), SERVER_TIMEOUT);
-    //   std::cout << "nfds: " << nfds << "\nfds:" << std::endl;
-    // for (size_t i = 0; i < _cur_poll_fds.size(); i++) {
-    //   std::cout << _cur_poll_fds[i].fd << ", ";
-    // }
-    // std::cout  << std::endl;
-    // if (nfds == 0) {
-    //   std::cout << "Polling arrary size: " << _cur_poll_fds.size() << std::endl;
-    //   std::cout << "State arrary size: " << _states.size() << std::endl;
-    // }
-    // else
-    //   std::cout << "nfds: " << nfds << std::endl;
     if (nfds == -1)
       throw std::runtime_error(strerror(errno));
 
@@ -182,16 +171,6 @@ void Server::run() {
             handle_error(*cur_state, UNDEFINED, READ_CGI_FAILURE, *this);
           continue;
         }
-        // std::cout << "Event triggered fd: " << it->fd << std::endl;
-        // std::cout << it->revents << std::endl;
-        // if (it->revents & POLLIN)
-        //   std::cout << "POLLIN" << std::endl;
-        // if (it->revents & POLLOUT)
-        //   std::cout << "POLLOUT" << std::endl;
-        // if (it->revents & POLLERR)
-        //   std::cout << "POLL_ERR" << std::endl;
-        // if (it->revents & POLLHUP)
-        //   std::cout << "POLLHUP" << std::endl;
         cur_state->timeEvent = std::time(NULL);
         cur_state->event_ct++;
         cur_state->stage(cur_state, *it, *this);
